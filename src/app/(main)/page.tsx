@@ -7,30 +7,42 @@ import CapabilityCard from "@/components/CapabilityCard";
 import ProjectCard from "@/components/ProjectCard";
 import { supabase } from "@/lib/supabase";
 
+const ICONS: Record<string, any> = {
+    Palette: <Palette size={24} />,
+    Layout: <Layout size={24} />,
+    Globe: <Globe size={24} />,
+    PenTool: <PenTool size={24} />,
+};
 
 export default function Home() {
+    const [settings, setSettings] = useState<any>(null);
     const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchFeatured() {
+        async function fetchData() {
             try {
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(3);
+                const [settingsRes, projectsRes] = await Promise.all([
+                    supabase.from('site_settings').select('*').single(),
+                    supabase.from('projects').select('*').order('created_at', { ascending: false }).limit(3)
+                ]);
 
-                if (error) throw error;
-                setFeaturedProjects(data || []);
+                if (settingsRes.data) setSettings(settingsRes.data);
+                if (projectsRes.data) setFeaturedProjects(projectsRes.data);
             } catch (err) {
                 console.error("Error:", err);
             } finally {
                 setLoading(false);
             }
         }
-        fetchFeatured();
+        fetchData();
     }, []);
+
+    if (loading) return <div className="min-h-screen flex justify-center items-center"><Loader2 className="animate-spin text-zinc-100" size={48} /></div>;
+
+    const heroTitle = settings?.hero_title || "Crafting digital experiences with minimal intent.";
+    const heroSubtitle = settings?.hero_subtitle || "Helping brands stand out through purposeful design and visual storytelling.";
+    const services = settings?.services || [];
 
     return (
         <div className="bg-white">
@@ -45,13 +57,13 @@ export default function Home() {
                         <span className="text-zinc-400 text-sm font-medium tracking-[0.2em] uppercase mb-6 block">
                             UI/UX & Graphic Designer
                         </span>
-                        <h1 className="text-5xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 leading-[1.1] mb-8">
-                            Crafting digital <br />
-                            <span className="text-razzmatazz">experiences</span> with <br />
-                            minimal intent.
+                        <h1 className="text-5xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 leading-[1.1] mb-8 whitespace-pre-line">
+                            {heroTitle.split(' ').map((word: string, i: number) => (
+                                <span key={i} className={i % 3 === 0 ? "text-razzmatazz" : ""}>{word} </span>
+                            ))}
                         </h1>
                         <p className="max-w-xl mx-auto text-zinc-500 text-lg md:text-xl font-light leading-relaxed mb-12">
-                            Helping brands stand out through <span className="text-razzmatazz">purposeful design</span> and visual storytelling.
+                            {heroSubtitle}
                         </p>
 
                         <div className="flex flex-col md:flex-row items-center justify-center gap-6">
@@ -91,31 +103,19 @@ export default function Home() {
                             </h2>
                         </div>
                         <p className="max-w-md text-zinc-500 font-light">
-                            I specialize in building <span className="text-razzmatazz">cohesive brand systems</span> and intuitive user interfaces that bridge the gap between aesthetics and functionality.
+                            I specialize in building <span className="text-razzmatazz">cohesive brand systems</span> and intuitive style guides.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <CapabilityCard
-                            icon={<Palette size={24} />}
-                            title="Branding"
-                            description="Visual systems that resonate and endure."
-                        />
-                        <CapabilityCard
-                            icon={<Layout size={24} />}
-                            title="UI/UX Design"
-                            description="Clean, user-centric digital interfaces."
-                        />
-                        <CapabilityCard
-                            icon={<Globe size={24} />}
-                            title="Digital Strategy"
-                            description="Data-driven design for online growth."
-                        />
-                        <CapabilityCard
-                            icon={<PenTool size={24} />}
-                            title="Illustration"
-                            description="Unique artwork to set your brand apart."
-                        />
+                        {services.map((service: any, i: number) => (
+                            <CapabilityCard
+                                key={i}
+                                icon={ICONS[service.icon] || <Palette size={24} />}
+                                title={service.title}
+                                description={service.description}
+                            />
+                        ))}
                     </div>
                 </div>
             </section>
@@ -132,50 +132,19 @@ export default function Home() {
                         </Link>
                     </div>
 
-                    {loading ? (
-                        <div className="flex justify-center py-20">
-                            <Loader2 className="animate-spin text-zinc-100" size={32} />
-                        </div>
-                    ) : featuredProjects.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
-                            {featuredProjects.map((project, index) => (
-                                <ProjectCard
-                                    key={project.id}
-                                    title={project.title}
-                                    category={project.category}
-                                    color={project.color}
-                                    slug={project.slug}
-                                    span={index === 0 ? "md:col-span-6" : "md:col-span-3"}
-                                    aspect={index === 0 ? "video" : "square"}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-20 border border-dashed border-zinc-100 rounded-[2rem]">
-                            <p className="text-zinc-400 italic">No featured projects yet.</p>
-                        </div>
-                    )}
-                </div>
-            </section>
-
-
-            {/* Call to Action */}
-            <section className="pb-32 px-6">
-                <div className="max-w-4xl mx-auto bg-zinc-900 rounded-[2.5rem] p-12 md:p-24 text-center text-white relative overflow-hidden">
-                    <div className="relative z-10">
-                        <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight mb-8">
-                            Have a project in mind? <br />
-                            Let's <span className="text-zinc-400">build it</span> together.
-                        </h2>
-                        <Link
-                            href="/contact"
-                            className="inline-flex px-8 py-4 bg-white text-zinc-900 rounded-full font-medium hover:bg-zinc-100 transition-all duration-300 shadow-sm"
-                        >
-                            Start a Conversation
-                        </Link>
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
+                        {featuredProjects.map((project, index) => (
+                            <ProjectCard
+                                key={project.id}
+                                title={project.title}
+                                category={project.category}
+                                color={project.color}
+                                slug={project.slug}
+                                span={index === 0 ? "md:col-span-6" : "md:col-span-3"}
+                                aspect={index === 0 ? "video" : "square"}
+                            />
+                        ))}
                     </div>
-                    {/* Abstract Grid Pattern */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
                 </div>
             </section>
         </div>

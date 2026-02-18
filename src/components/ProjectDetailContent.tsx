@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import BlockRenderer from "@/components/BlockRenderer";
 
 export default function ProjectDetailContent({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
@@ -78,10 +79,6 @@ export default function ProjectDetailContent({ params }: { params: Promise<{ slu
                                 <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Year</span>
                                 <span className="text-zinc-900 font-medium">{project.year}</span>
                             </div>
-                            <div className="space-y-1">
-                                <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Services</span>
-                                <span className="text-zinc-900 font-medium">{project.services?.join(", ") || "Design"}</span>
-                            </div>
                             <div className="space-y-1 text-right">
                                 <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Role</span>
                                 <span className="text-zinc-900 font-medium">Lead Designer</span>
@@ -90,29 +87,21 @@ export default function ProjectDetailContent({ params }: { params: Promise<{ slu
                     </motion.div>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 mb-32">
-                    <div className="lg:col-span-4">
-                        <h2 className="text-2xl font-heading font-medium text-zinc-900 mb-6">The Brief.</h2>
-                        <p className="text-zinc-500 text-lg font-light leading-relaxed">
-                            {project.description}
-                        </p>
-                    </div>
-                    <div className="lg:col-span-8">
-                        <div className="aspect-video bg-zinc-50 rounded-[2rem] overflow-hidden border border-zinc-100 flex items-center justify-center relative group">
-                            <div className="absolute inset-0 opacity-10" style={{ backgroundColor: project.color }} />
-                            <div className="text-zinc-200 font-heading text-6xl font-medium select-none group-hover:scale-110 transition-transform duration-1000">
+                <div className="space-y-32">
+                    {/* Main Project Visual */}
+                    <div className="aspect-video bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 flex items-center justify-center relative group">
+                        <div className="absolute inset-0 opacity-10" style={{ backgroundColor: project.color }} />
+                        {project.featured_image ? (
+                            <img src={project.featured_image} alt={project.title} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="text-zinc-200 font-heading text-6xl font-medium select-none group-hover:scale-110 transition-transform duration-1000 uppercase tracking-tighter">
                                 {project.title}
                             </div>
-                        </div>
+                        )}
                     </div>
-                </div>
 
-                <div className="space-y-12">
-                    <div className="aspect-[16/9] bg-zinc-50 rounded-[2rem] overflow-hidden border border-zinc-100" />
-                    <div className="grid grid-cols-2 gap-12">
-                        <div className="aspect-square bg-zinc-50 rounded-[2rem] overflow-hidden border border-zinc-100" />
-                        <div className="aspect-square bg-zinc-50 rounded-[2rem] overflow-hidden border border-zinc-100" />
-                    </div>
+                    {/* Dynamic Blocks */}
+                    <BlockRenderer blocks={project.content_blocks} />
                 </div>
             </div>
         </div>

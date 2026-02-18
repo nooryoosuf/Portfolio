@@ -1,28 +1,61 @@
 "use client";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { articles } from "@/data/blog";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, Loader2, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import BlockRenderer from "@/components/BlockRenderer";
 
 export default function ArticleDetailContent({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
-    const article = articles.find((a) => a.slug === slug);
+    const [post, setPost] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    if (!article) {
+    useEffect(() => {
+        async function fetchPost() {
+            try {
+                const { data, error } = await supabase
+                    .from('blog_posts')
+                    .select('*')
+                    .eq('slug', slug)
+                    .single();
+
+                if (error || !data) {
+                    setPost(null);
+                } else {
+                    setPost(data);
+                }
+            } catch (err) {
+                console.error("Error fetching article:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchPost();
+    }, [slug]);
+
+    if (loading) {
+        return (
+            <div className="pt-40 pb-32 px-6 flex justify-center items-center min-h-screen">
+                <Loader2 className="animate-spin text-zinc-100" size={48} />
+            </div>
+        );
+    }
+
+    if (!post) {
         notFound();
     }
 
     return (
-        <div className="pt-40 pb-32 px-6 bg-white min-h-screen">
-            <article className="max-w-4xl mx-auto">
+        <article className="pt-40 pb-32 px-6 bg-white min-h-screen">
+            <div className="max-w-4xl mx-auto">
                 <Link
                     href="/blog"
-                    className="inline-flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors mb-12 group text-sm font-medium"
+                    className="inline-flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors mb-12 group"
                 >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                    Back to Journal
+                    Journal Index
                 </Link>
 
                 <header className="mb-20">
@@ -30,47 +63,34 @@ export default function ArticleDetailContent({ params }: { params: Promise<{ slu
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <div className="flex gap-4 items-center mb-8">
-                            <span className="text-zinc-900 text-[10px] uppercase tracking-widest font-semibold px-3 py-1 bg-zinc-100 rounded-full">
-                                {article.category}
-                            </span>
-                            <div className="flex items-center gap-2 text-zinc-400 text-xs uppercase tracking-widest">
-                                <Calendar size={12} />
-                                {article.date}
-                            </div>
-                            <div className="flex items-center gap-2 text-zinc-400 text-xs uppercase tracking-widest">
-                                <Clock size={12} />
-                                {article.readTime}
-                            </div>
+                        <div className="flex items-center gap-6 mb-8 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+                            <span className="text-razzmatazz">{post.category}</span>
+                            <div className="flex items-center gap-1.5 italic"><Calendar size={12} /> {new Date(post.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                            <div className="flex items-center gap-1.5 italic"><Clock size={12} /> {post.read_time}</div>
                         </div>
 
-                        <h1 className="text-5xl md:text-7xl font-heading font-medium tracking-tight text-zinc-900 mb-8 leading-tight">
-                            {article.title}
+                        <h1 className="text-5xl md:text-7xl font-heading font-medium tracking-tight text-zinc-900 mb-12 leading-[1.05]">
+                            {post.title}
                         </h1>
-                        <p className="text-zinc-500 text-xl md:text-2xl font-light leading-relaxed">
-                            {article.description}
+
+                        <p className="text-2xl md:text-3xl font-heading font-light italic text-zinc-500 mb-12 leading-relaxed">
+                            "{post.description}"
                         </p>
                     </motion.div>
                 </header>
 
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="prose prose-zinc prose-lg max-w-none text-zinc-600 font-light leading-loose space-y-8"
-                >
-                    <div className="h-px bg-zinc-100 w-full mb-12" />
-                    <p className="whitespace-pre-line">
-                        {article.content}
-                    </p>
-                    <p>
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
-                    </p>
-                    <div className="aspect-video bg-zinc-50 rounded-[2rem] border border-zinc-100 flex items-center justify-center text-zinc-200 font-heading text-4xl">
-                        Illustration / Graphic
+                <div className="space-y-20">
+                    {post.featured_image && (
+                        <div className="aspect-video bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100">
+                            <img src={post.featured_image} alt={post.title} className="w-full h-full object-cover" />
+                        </div>
+                    )}
+
+                    <div className="max-w-3xl">
+                        <BlockRenderer blocks={post.content_blocks} />
                     </div>
-                </motion.div>
-            </article>
-        </div>
+                </div>
+            </div>
+        </article>
     );
 }
