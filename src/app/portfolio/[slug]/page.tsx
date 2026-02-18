@@ -1,12 +1,14 @@
 "use client";
+import { use } from "react";
 import { motion } from "framer-motion";
 import { projects } from "@/data/projects";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import Link from "next/link";
 
-export default function ProjectDetail({ params }: { params: { slug: string } }) {
-    const project = projects.find((p) => p.slug === params.slug);
+export default function ProjectDetail({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = use(params);
+    const project = projects.find((p) => p.slug === slug);
 
     if (!project) {
         notFound();
