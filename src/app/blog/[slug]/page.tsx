@@ -6,6 +6,13 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
 
+export function generateStaticParams() {
+    return articles.map((article) => ({
+        slug: article.slug,
+    }));
+}
+
+
 export default function ArticleDetail(props: { params: Promise<{ slug: string }> }) {
     const params = use(props.params);
     const { slug } = params;

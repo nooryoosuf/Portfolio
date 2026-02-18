@@ -6,6 +6,13 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import Link from "next/link";
 
+export function generateStaticParams() {
+    return projects.map((project) => ({
+        slug: project.slug,
+    }));
+}
+
+
 export default function ProjectDetail(props: { params: Promise<{ slug: string }> }) {
     const params = use(props.params);
     const { slug } = params;
