@@ -10,9 +10,16 @@
   --border: #e4e4e7;
 }
 
+/* Force Light Mode Styles */
+html {
+  background-color: #ffffff !important;
+  color: #0a0a0b !important;
+  color-scheme: light !important;
+}
+
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #0a0a0b;
+  background: #ffffff;
   overflow-x: hidden;
   font-feature-settings: "ss01", "ss02", "cv01", "cv02";
 }
@@ -63,4 +70,12 @@ body {
 
 .glass {
   @apply bg-white/70 backdrop-blur-md border border-white/20;
+}
+
+/* Ensure no dark mode overrides from plugins or browser settings */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #0a0a0b;
+  }
 }

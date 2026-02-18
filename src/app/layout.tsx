@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import SmoothScrolling from "@/components/SmoothScrolling";
-import PageTransition from "@/components/PageTransition";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -27,19 +23,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="light">
-            <body className={`${inter.variable} ${outfit.variable} font-body antialiased selection:bg-black selection:text-white`}>
-                <SmoothScrolling>
-                    <Header />
-                    <PageTransition>
-                        <main className="min-h-screen">
-                            {children}
-                        </main>
-                    </PageTransition>
-                    <Footer />
-                </SmoothScrolling>
+        <html lang="en" className="light" style={{ colorScheme: 'light' }}>
+            <body className={`${inter.variable} ${outfit.variable} font-body antialiased selection:bg-black selection:text-white bg-white text-zinc-900`}>
+                {children}
             </body>
         </html>
     );
 }
-
