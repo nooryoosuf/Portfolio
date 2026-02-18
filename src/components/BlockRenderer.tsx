@@ -36,9 +36,13 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                         );
 
                     case 'image_grid':
-                        const cols = block.columns || 1;
+                        const gridCols: Record<number, string> = {
+                            1: 'md:grid-cols-1',
+                            2: 'md:grid-cols-2',
+                            3: 'md:grid-cols-3',
+                        };
                         return (
-                            <div key={index} className={`grid grid-cols-1 md:grid-cols-${cols} gap-8`}>
+                            <div key={index} className={`grid grid-cols-1 ${gridCols[block.columns] || 'md:grid-cols-1'} gap-8`}>
                                 {block.images?.map((url: string, i: number) => (
                                     <motion.div
                                         key={i}

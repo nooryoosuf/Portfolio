@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Search, Filter, Edit, Trash2, Loader2, FileText } from "lucide-center";
+import { Plus, Search, Edit, Trash2, Loader2, FileText as BlogIcon } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { FileText as BlogIcon } from "lucide-react";
 
 export default function AdminBlog() {
     const [posts, setPosts] = useState<any[]>([]);
@@ -114,9 +113,9 @@ export default function AdminBlog() {
                                     <td className="px-8 py-6 text-sm text-zinc-300 font-medium italic">{new Date(post.created_at).toLocaleDateString()}</td>
                                     <td className="px-8 py-6 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="p-2 text-zinc-300 hover:text-zinc-900 transition-colors" title="Edit">
+                                            <Link href={`/admin/blog/edit/${post.id}`} className="p-2 text-zinc-300 hover:text-zinc-900 transition-colors" title="Edit">
                                                 <Edit size={16} />
-                                            </button>
+                                            </Link>
                                             <button
                                                 onClick={() => deletePost(post.id)}
                                                 className="p-2 text-zinc-300 hover:text-red-500 transition-colors"

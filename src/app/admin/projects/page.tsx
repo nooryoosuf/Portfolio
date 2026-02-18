@@ -118,9 +118,9 @@ export default function AdminProjects() {
                                     <td className="px-8 py-6 text-sm text-zinc-400 italic">{project.year}</td>
                                     <td className="px-8 py-6 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors" title="Edit">
+                                            <Link href={`/admin/projects/edit/${project.id}`} className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors" title="Edit">
                                                 <Edit size={16} />
-                                            </button>
+                                            </Link>
                                             <button
                                                 onClick={() => deleteProject(project.id)}
                                                 className="p-2 text-zinc-400 hover:text-red-500 transition-colors"
