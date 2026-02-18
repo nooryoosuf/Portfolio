@@ -1,14 +1,46 @@
 "use client";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { projects } from "@/data/projects";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function ProjectDetailContent({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
-    const project = projects.find((p) => p.slug === slug);
+    const [project, setProject] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchProject() {
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('slug', slug)
+                    .single();
+
+                if (error || !data) {
+                    setProject(null);
+                } else {
+                    setProject(data);
+                }
+            } catch (err) {
+                console.error("Error fetching project:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchProject();
+    }, [slug]);
+
+    if (loading) {
+        return (
+            <div className="pt-40 pb-32 px-6 flex justify-center items-center min-h-screen">
+                <Loader2 className="animate-spin text-zinc-100" size={48} />
+            </div>
+        );
+    }
 
     if (!project) {
         notFound();
@@ -40,7 +72,7 @@ export default function ProjectDetailContent({ params }: { params: Promise<{ slu
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-y border-zinc-100">
                             <div className="space-y-1">
                                 <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Client</span>
-                                <span className="text-zinc-900 font-medium">{project.client}</span>
+                                <span className="text-zinc-900 font-medium">{project.client || "N/A"}</span>
                             </div>
                             <div className="space-y-1">
                                 <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Year</span>
@@ -48,7 +80,7 @@ export default function ProjectDetailContent({ params }: { params: Promise<{ slu
                             </div>
                             <div className="space-y-1">
                                 <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Services</span>
-                                <span className="text-zinc-900 font-medium">{project.services.join(", ")}</span>
+                                <span className="text-zinc-900 font-medium">{project.services?.join(", ") || "Design"}</span>
                             </div>
                             <div className="space-y-1 text-right">
                                 <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Role</span>

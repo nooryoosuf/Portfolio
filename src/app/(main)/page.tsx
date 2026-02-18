@@ -1,12 +1,37 @@
 "use client";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Palette, Layout, Globe, PenTool } from "lucide-react";
+import { ArrowUpRight, Palette, Layout, Globe, PenTool, Loader2 } from "lucide-react";
 import Link from "next/link";
 import CapabilityCard from "@/components/CapabilityCard";
 import ProjectCard from "@/components/ProjectCard";
+import { supabase } from "@/lib/supabase";
 
 
 export default function Home() {
+    const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchFeatured() {
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+
+                if (error) throw error;
+                setFeaturedProjects(data || []);
+            } catch (err) {
+                console.error("Error:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchFeatured();
+    }, []);
+
     return (
         <div className="bg-white">
             {/* Hero Section */}
@@ -47,7 +72,6 @@ export default function Home() {
                     </motion.div>
                 </div>
 
-                {/* Visual Accent */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -108,34 +132,29 @@ export default function Home() {
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
-                        {/* Size 3 Card */}
-                        <ProjectCard
-                            title="Rashu Cup 2024"
-                            category="Branding"
-                            color="#18181b"
-                            slug="northend-united"
-                            span="md:col-span-6"
-                            aspect="video"
-                        />
-                        {/* Size 2 Cards */}
-                        <ProjectCard
-                            title="Feithoriya"
-                            category="Brand Design"
-                            color="#3f3f46"
-                            slug="feithoriya"
-                            span="md:col-span-3"
-                            aspect="square"
-                        />
-                        <ProjectCard
-                            title="Dunk n Dip"
-                            category="Packaging"
-                            color="#71717a"
-                            slug="dunk-n-dip"
-                            span="md:col-span-3"
-                            aspect="square"
-                        />
-                    </div>
+                    {loading ? (
+                        <div className="flex justify-center py-20">
+                            <Loader2 className="animate-spin text-zinc-100" size={32} />
+                        </div>
+                    ) : featuredProjects.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
+                            {featuredProjects.map((project, index) => (
+                                <ProjectCard
+                                    key={project.id}
+                                    title={project.title}
+                                    category={project.category}
+                                    color={project.color}
+                                    slug={project.slug}
+                                    span={index === 0 ? "md:col-span-6" : "md:col-span-3"}
+                                    aspect={index === 0 ? "video" : "square"}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 border border-dashed border-zinc-100 rounded-[2rem]">
+                            <p className="text-zinc-400 italic">No featured projects yet.</p>
+                        </div>
+                    )}
                 </div>
             </section>
 

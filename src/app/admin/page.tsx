@@ -1,14 +1,48 @@
 "use client";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, Users, Eye, Plus } from "lucide-react";
+import { Activity, Users, Eye, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminDashboard() {
-    const stats = [
-        { label: "Total Projects", value: "12", icon: <Activity size={20} />, change: "+2 this month" },
-        { label: "Active Clients", value: "5", icon: <Users size={20} />, change: "Stable" },
-        { label: "Site Views", value: "1.2k", icon: <Eye size={20} />, change: "+15%" },
-    ];
+    const [stats, setStats] = useState([
+        { label: "Total Projects", value: "0", icon: <Activity size={20} />, change: "Database Syncing..." },
+        { label: "Active Clients", value: "0", icon: <Users size={20} />, change: "Stable" },
+        { label: "Site Views", value: "0", icon: <Eye size={20} />, change: "Live" },
+    ]);
+    const [recentProjects, setRecentProjects] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchDashboardData() {
+            try {
+                const { data: projects, count } = await supabase
+                    .from('projects')
+                    .select('*', { count: 'exact' })
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+
+                if (projects) {
+                    setRecentProjects(projects);
+
+                    // Get unique clients
+                    const uniqueClients = new Set(projects.map(p => p.client).filter(Boolean)).size;
+
+                    setStats([
+                        { label: "Total Projects", value: count?.toString() || "0", icon: <Activity size={20} />, change: "Active" },
+                        { label: "Unique Clients", value: uniqueClients.toString(), icon: <Users size={20} />, change: "Stable" },
+                        { label: "System Status", value: "Online", icon: <Eye size={20} />, change: "Healthy" },
+                    ]);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchDashboardData();
+    }, []);
 
     return (
         <div>
@@ -50,7 +84,6 @@ export default function AdminDashboard() {
                         <div className="text-[10px] text-razzmatazz font-medium tracking-wider uppercase">
                             {stat.change}
                         </div>
-                        {/* Accent line */}
                         <div className="absolute bottom-0 left-0 h-1 bg-razzmatazz w-0 group-hover:w-full transition-all duration-500" />
                     </motion.div>
                 ))}
@@ -63,27 +96,38 @@ export default function AdminDashboard() {
                     Recent Projects
                 </h2>
 
-                <div className="space-y-4">
-                    {[1, 2, 3].map((_, i) => (
-                        <div key={i} className="group p-6 bg-white border border-zinc-100 rounded-xl hover:border-zinc-200 transition-all flex items-center justify-between">
-                            <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100 grayscale-0 group-hover:scale-105 transition-all">
-                                    <div className="w-full h-full bg-gradient-to-br from-zinc-100 to-zinc-200" />
+                {loading ? (
+                    <div className="flex justify-center py-10">
+                        <Loader2 className="animate-spin text-zinc-100" size={32} />
+                    </div>
+                ) : recentProjects.length > 0 ? (
+                    <div className="space-y-4">
+                        {recentProjects.map((project) => (
+                            <div key={project.id} className="group p-6 bg-white border border-zinc-100 rounded-xl hover:border-zinc-200 transition-all flex items-center justify-between">
+                                <div className="flex items-center gap-6">
+                                    <div
+                                        className="w-16 h-16 rounded-lg overflow-hidden border border-zinc-100 transition-all opacity-20"
+                                        style={{ backgroundColor: project.color || '#f4f4f5' }}
+                                    />
+                                    <div>
+                                        <h3 className="text-zinc-900 font-medium transition-colors">{project.title}</h3>
+                                        <p className="text-zinc-500 text-sm italic">{project.category} • {project.year}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-zinc-900 font-medium transition-colors">Rashu Cup 2024</h3>
-                                    <p className="text-zinc-500 text-sm italic">Visual Identity • Updated 2 days ago</p>
-                                </div>
+                                <Link
+                                    href={`/admin/projects`}
+                                    className="text-xs uppercase tracking-widest font-bold text-zinc-300 hover:text-zinc-900 transition-colors"
+                                >
+                                    Configure _
+                                </Link>
                             </div>
-                            <Link
-                                href={`/admin/projects/edit/${i}`}
-                                className="text-xs uppercase tracking-widest font-bold text-zinc-300 hover:text-zinc-900 transition-colors"
-                            >
-                                Configure _
-                            </Link>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-10 border border-dashed border-zinc-100 rounded-xl">
+                        <p className="text-zinc-400 text-sm italic">No projects found in the system.</p>
+                    </div>
+                )}
             </section>
         </div>
     );
