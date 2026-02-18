@@ -6,8 +6,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import Link from "next/link";
 
-export default function ProjectDetail({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
+export default function ProjectDetail(props: { params: Promise<{ slug: string }> }) {
+    const params = use(props.params);
+    const { slug } = params;
     const project = projects.find((p) => p.slug === slug);
 
     if (!project) {

@@ -6,8 +6,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
 
-export default function ArticleDetail({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
+export default function ArticleDetail(props: { params: Promise<{ slug: string }> }) {
+    const params = use(props.params);
+    const { slug } = params;
     const article = articles.find((a) => a.slug === slug);
 
     if (!article) {
