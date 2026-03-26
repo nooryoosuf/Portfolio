@@ -77,6 +77,7 @@ export default function Portfolio() {
                                 category={project.category}
                                 color={project.color}
                                 slug={project.slug}
+                                featured_image={project.featured_image}
                                 span={getSpan(index)}
                                 aspect={getAspect(index) as any}
                             />

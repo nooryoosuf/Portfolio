@@ -11,9 +11,10 @@ interface ProjectCardProps {
     span?: string;
     slug: string;
     aspect?: "square" | "video" | "portrait";
+    featured_image?: string;
 }
 
-export default function ProjectCard({ title, category, color, slug, span = "", aspect = "portrait" }: ProjectCardProps) {
+export default function ProjectCard({ title, category, color, slug, span = "", aspect = "portrait", featured_image }: ProjectCardProps) {
     const aspectClasses = {
         square: "aspect-square",
         video: "aspect-video",
@@ -39,11 +40,19 @@ export default function ProjectCard({ title, category, color, slug, span = "", a
                     {/* Minimal Grid Pattern for interest */}
                     <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-zinc-200 font-heading text-[6rem] md:text-[8rem] font-medium select-none group-hover:scale-110 transition-transform duration-1000">
-                            {title.charAt(0)}
-                        </span>
-                    </div>
+                    {featured_image ? (
+                        <img
+                            src={featured_image}
+                            alt={title}
+                            className="absolute inset-0 w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[2000ms]"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-zinc-200 font-heading text-[6rem] md:text-[8rem] font-medium select-none group-hover:scale-110 transition-transform duration-1000">
+                                {title.charAt(0)}
+                            </span>
+                        </div>
+                    )}
 
                     <div className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-sm">
                         <ArrowUpRight size={20} />

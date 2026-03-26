@@ -140,6 +140,7 @@ export default function Home() {
                                 category={project.category}
                                 color={project.color}
                                 slug={project.slug}
+                                featured_image={project.featured_image}
                                 span={index === 0 ? "md:col-span-6" : "md:col-span-3"}
                                 aspect={index === 0 ? "video" : "square"}
                             />

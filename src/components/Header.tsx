@@ -44,6 +44,13 @@ export default function Header() {
                     ))}
                 </div>
 
+                <Link 
+                    href="/contact" 
+                    className="hidden md:block bg-zinc-900 text-white px-5 py-2 rounded-full text-[13px] font-medium hover:bg-zinc-800 transition-all duration-300 shadow-sm pointer-events-auto"
+                >
+                    Connect
+                </Link>
+
                 {/* Mobile Menu Button */}
                 <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}

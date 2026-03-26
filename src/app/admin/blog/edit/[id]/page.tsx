@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Save, Plus, X, Type, Quote, LayoutList, Image as ImageIcon, LayoutGrid, Clock, Loader2 } from "lucide-react";
