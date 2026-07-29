@@ -22,7 +22,7 @@ export default function ProjectCard({ title, category, color, slug, span = "", a
     };
 
     return (
-        <Link href={`/portfolio/${slug}`} className={span}>
+        <Link href={`/portfolio/project?slug=${slug}`} className={span}>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}

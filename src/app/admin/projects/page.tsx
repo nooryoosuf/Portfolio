@@ -118,7 +118,7 @@ export default function AdminProjects() {
                                 </div>
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => router.push(`/admin/projects/edit/${project.id}`)}
+                                        onClick={() => router.push(`/admin/projects/edit?id=${project.id}`)}
                                         className="p-3 bg-zinc-50 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
                                     >
                                         <Edit size={16} />
@@ -146,7 +146,7 @@ export default function AdminProjects() {
                                     <div className="w-6 h-6 rounded-full border border-white bg-zinc-100" />
                                     <div className="w-6 h-6 rounded-full border border-white bg-zinc-200" />
                                 </div>
-                                <Link href={`/portfolio/${project.slug}`} target="_blank" className="text-zinc-300 hover:text-zinc-900 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest italic group/link">
+                                <Link href={`/portfolio/project?slug=${project.slug}`} target="_blank" className="text-zinc-300 hover:text-zinc-900 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest italic group/link">
                                     Live Preview
                                     <ExternalLink size={12} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
                                 </Link>

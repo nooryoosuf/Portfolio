@@ -1,14 +1,15 @@
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Save, Plus, X, Type, Quote, LayoutList, Image as ImageIcon, LayoutGrid, Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
 import ImageUpload from "@/components/ImageUpload";
 
-export default function EditBlogPostClient({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
+function EditBlogPostContent() {
+    const searchParams = useSearchParams();
+    const id = searchParams.get("id");
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -24,6 +25,7 @@ export default function EditBlogPostClient({ params }: { params: Promise<{ id: s
     });
 
     useEffect(() => {
+        if (!id) return;
         async function fetchPost() {
             try {
                 const { data, error } = await supabase
@@ -212,5 +214,13 @@ export default function EditBlogPostClient({ params }: { params: Promise<{ id: s
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function EditBlogPostClient() {
+    return (
+        <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-zinc-200" size={48} /></div>}>
+            <EditBlogPostContent />
+        </Suspense>
     );
 }

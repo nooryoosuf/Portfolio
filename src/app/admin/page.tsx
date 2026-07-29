@@ -130,7 +130,7 @@ export default function AdminDashboard() {
                                         </div>
                                         <div className="flex items-center gap-6">
                                             <span className="text-xs text-zinc-300 italic font-medium">{new Date(project.created_at).toLocaleDateString()}</span>
-                                            <Link href={`/admin/projects/edit/${project.id}`} className="p-2 text-zinc-200 hover:text-zinc-900 transition-colors">
+                                            <Link href={`/admin/projects/edit?id=${project.id}`} className="p-2 text-zinc-200 hover:text-zinc-900 transition-colors">
                                                 <Edit size={18} />
                                             </Link>
                                         </div>
