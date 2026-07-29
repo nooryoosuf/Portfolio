@@ -81,7 +81,9 @@ export default function ProjectDetailContent({ params }: { params: Promise<{ slu
                             </div>
                             <div className="space-y-1 text-right">
                                 <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Role</span>
-                                <span className="text-zinc-900 font-medium">{project.role || "Lead Designer"}</span>
+                                <span className="text-zinc-900 font-medium">
+                                    {project.content_blocks?.find((b: any) => b.type === 'meta')?.role || project.role || "Lead Designer"}
+                                </span>
                             </div>
                         </div>
                     </motion.div>

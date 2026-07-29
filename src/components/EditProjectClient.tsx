@@ -39,7 +39,16 @@ function EditProjectContent() {
                     .single();
 
                 if (error) throw error;
-                if (data) setFormData(data);
+                if (data) {
+                    const metaBlock = data.content_blocks?.find((b: any) => b.type === 'meta');
+                    const roleVal = metaBlock?.role || data.role || "";
+                    const cleanBlocks = (data.content_blocks || []).filter((b: any) => b.type !== 'meta');
+                    setFormData({
+                        ...data,
+                        role: roleVal,
+                        content_blocks: cleanBlocks
+                    });
+                }
             } catch (err: any) {
                 alert("Error fetching project: " + err.message);
                 router.push("/admin/projects");
@@ -74,10 +83,17 @@ function EditProjectContent() {
         setSaving(true);
 
         try {
+            const { role, ...restFormData } = formData;
+            const blocksWithMeta = [
+                { type: 'meta', role: role || 'Lead Designer' },
+                ...(formData.content_blocks || []).filter((b: any) => b.type !== 'meta')
+            ];
+
             const { error } = await supabase
                 .from('projects')
                 .update({
-                    ...formData,
+                    ...restFormData,
+                    content_blocks: blocksWithMeta,
                     slug: formData.slug || formData.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
                 })
                 .eq('id', id);

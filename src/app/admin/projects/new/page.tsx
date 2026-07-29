@@ -64,11 +64,18 @@ export default function NewProject() {
         setLoading(true);
 
         try {
+            const { role, ...restFormData } = formData;
+            const blocksWithMeta = [
+                { type: 'meta', role: role || 'Lead Designer' },
+                ...(formData.content_blocks || []).filter((b: any) => b.type !== 'meta')
+            ];
+
             const { error } = await supabase
                 .from('projects')
                 .insert([
                     {
-                        ...formData,
+                        ...restFormData,
+                        content_blocks: blocksWithMeta,
                         slug: formData.slug || formData.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
                     }
                 ]);

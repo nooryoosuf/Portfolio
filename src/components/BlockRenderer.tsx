@@ -8,10 +8,11 @@ interface BlockProps {
 
 export default function BlockRenderer({ blocks }: BlockProps) {
     if (!blocks || !Array.isArray(blocks)) return null;
+    const renderableBlocks = blocks.filter((b: any) => b && b.type !== 'meta');
 
     return (
         <div className="space-y-32">
-            {blocks.map((block, index) => {
+            {renderableBlocks.map((block, index) => {
                 switch (block.type) {
                     case 'section':
                         return (
