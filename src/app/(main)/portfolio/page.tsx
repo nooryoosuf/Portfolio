@@ -14,14 +14,23 @@ export default function Portfolio() {
             try {
                 const [projectsRes, settingsRes] = await Promise.all([
                     supabase.from('projects').select('*'),
-                    supabase.from('site_settings').select('project_order').single()
+                    supabase.from('site_settings').select('*').single()
                 ]);
 
                 if (projectsRes.error) throw projectsRes.error;
                 let rawProjects = projectsRes.data || [];
-                const projectOrder = settingsRes.data?.project_order;
+                let projectOrder: string[] = [];
 
-                if (projectOrder && Array.isArray(projectOrder)) {
+                if (settingsRes.data?.about_text) {
+                    try {
+                        const parsed = JSON.parse(settingsRes.data.about_text);
+                        if (parsed && Array.isArray(parsed.project_order)) {
+                            projectOrder = parsed.project_order;
+                        }
+                    } catch (e) {}
+                }
+
+                if (projectOrder.length > 0) {
                     const orderMap = new Map(projectOrder.map((id: string, idx: number) => [id, idx]));
                     rawProjects.sort((a, b) => {
                         const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : 999;

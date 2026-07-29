@@ -28,8 +28,17 @@ export default function Home() {
                 ]);
 
                 let rawProjects = projectsRes.data || [];
-                const projectOrder = settingsRes.data?.project_order;
-                if (projectOrder && Array.isArray(projectOrder)) {
+                let projectOrder: string[] = [];
+                if (settingsRes.data?.about_text) {
+                    try {
+                        const parsed = JSON.parse(settingsRes.data.about_text);
+                        if (parsed && Array.isArray(parsed.project_order)) {
+                            projectOrder = parsed.project_order;
+                        }
+                    } catch (e) {}
+                }
+
+                if (projectOrder.length > 0) {
                     const orderMap = new Map(projectOrder.map((id: string, idx: number) => [id, idx]));
                     rawProjects.sort((a, b) => {
                         const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : 999;

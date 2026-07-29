@@ -24,15 +24,23 @@ export default function AdminProjects() {
             setLoading(true);
             const [projectsRes, settingsRes] = await Promise.all([
                 supabase.from('projects').select('*'),
-                supabase.from('site_settings').select('project_order').single()
+                supabase.from('site_settings').select('about_text').single()
             ]);
 
             if (projectsRes.error) throw projectsRes.error;
             let rawProjects = projectsRes.data || [];
 
-            // Sort by site_settings.project_order if available
-            const projectOrder = settingsRes.data?.project_order;
-            if (projectOrder && Array.isArray(projectOrder)) {
+            let projectOrder: string[] = [];
+            if (settingsRes.data?.about_text) {
+                try {
+                    const parsed = JSON.parse(settingsRes.data.about_text);
+                    if (parsed && Array.isArray(parsed.project_order)) {
+                        projectOrder = parsed.project_order;
+                    }
+                } catch (e) {}
+            }
+
+            if (projectOrder.length > 0) {
                 const orderMap = new Map(projectOrder.map((id: string, idx: number) => [id, idx]));
                 rawProjects.sort((a, b) => {
                     const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : 999;
@@ -55,13 +63,23 @@ export default function AdminProjects() {
         try {
             setSavingOrder(true);
             const orderedIds = updatedProjects.map(p => p.id);
+            const { data: existing } = await supabase.from('site_settings').select('about_text').single();
+
+            let baseObj: any = {};
+            if (existing?.about_text) {
+                try { baseObj = JSON.parse(existing.about_text); } catch (e) { baseObj = { text: existing.about_text }; }
+            }
+            baseObj.project_order = orderedIds;
+
             const { error } = await supabase
                 .from('site_settings')
-                .upsert({ id: 'main', project_order: orderedIds });
+                .update({ about_text: JSON.stringify(baseObj) })
+                .eq('id', 'main');
 
             if (error) throw error;
         } catch (err: any) {
             console.error("Failed to save project order:", err.message);
+            alert("Failed to save order: " + err.message);
         } finally {
             setSavingOrder(false);
         }
@@ -77,7 +95,7 @@ export default function AdminProjects() {
 
         setProjects(newProjects);
         await saveProjectOrder(newProjects);
-        setToastMessage("Project sequence re-ordered!");
+        setToastMessage("Project sequence saved!");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
     };
@@ -90,7 +108,7 @@ export default function AdminProjects() {
 
         setProjects(newProjects);
         await saveProjectOrder(newProjects);
-        setToastMessage(`"${hero.title}" set as Homepage Hero Card!`);
+        setToastMessage(`"${hero.title}" saved as Homepage Hero Card!`);
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
     };
@@ -155,7 +173,7 @@ export default function AdminProjects() {
                 </div>
                 {savingOrder && (
                     <span className="text-xs font-bold text-razzmatazz uppercase tracking-widest flex items-center gap-2 px-4 py-2 bg-pink-50 rounded-full border border-pink-100 animate-pulse">
-                        <Loader2 size={14} className="animate-spin" /> Syncing Order...
+                        <Loader2 size={14} className="animate-spin" /> Saving Order...
                     </span>
                 )}
             </div>
@@ -220,9 +238,9 @@ export default function AdminProjects() {
                                                 <button
                                                     onClick={() => makeHero(index)}
                                                     title="Make Homepage Hero Card"
-                                                    className="p-1.5 hover:bg-razzmatazz/10 text-zinc-400 hover:text-razzmatazz rounded-xl transition-all"
+                                                    className="p-1.5 hover:bg-razzmatazz/10 text-zinc-400 hover:text-razzmatazz rounded-xl transition-all flex items-center gap-1 text-[10px] font-bold uppercase"
                                                 >
-                                                    <Star size={14} />
+                                                    <Star size={14} /> Star
                                                 </button>
                                             )}
                                         </div>
