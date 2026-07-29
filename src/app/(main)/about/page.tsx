@@ -22,7 +22,20 @@ export default function About() {
         async function fetchSettings() {
             try {
                 const { data } = await supabase.from('site_settings').select('*').single();
-                if (data) setSettings(data);
+                if (data) {
+                    let aboutData: any = {};
+                    if (data.about_text) {
+                        try {
+                            aboutData = JSON.parse(data.about_text);
+                        } catch (e) {
+                            aboutData = { about_bio_1: data.about_text };
+                        }
+                    }
+                    setSettings({
+                        ...data,
+                        ...aboutData
+                    });
+                }
             } catch (err) {
                 console.error("Error fetching about settings:", err);
             } finally {
@@ -72,9 +85,9 @@ export default function About() {
                             ))}
                         </h1>
                         <div className="space-y-8 text-zinc-500 text-lg md:text-xl font-light leading-relaxed max-w-xl">
-                            <p>{bio1}</p>
-                            <p>{bio2}</p>
-                            <p>{bio3}</p>
+                            {bio1 && <p>{bio1}</p>}
+                            {bio2 && <p>{bio2}</p>}
+                            {bio3 && <p>{bio3}</p>}
                         </div>
                     </motion.div>
 

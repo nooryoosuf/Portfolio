@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Save, Loader2, Plus, Trash2, User, Cpu } from "lucide-react";
+import { Save, Loader2, Plus, Trash2, User, Cpu, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import ImageUpload from "@/components/ImageUpload";
 import SoftwareIcon from "@/components/SoftwareIcon";
+import { motion, AnimatePresence } from "framer-motion";
 
 const DEFAULT_SOFTWARES = [
     { name: "MS Office", category: "Productivity Suite" },
@@ -17,6 +18,8 @@ const DEFAULT_SOFTWARES = [
 export default function SiteSettings() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+
     const [settings, setSettings] = useState<any>({
         hero_title: "Crafting digital experiences with minimal intent.",
         hero_subtitle: "Helping brands stand out through purposeful design and visual storytelling.",
@@ -30,6 +33,7 @@ export default function SiteSettings() {
         about_beyond_text: "When I'm not designing, you'll find me on the football pitch, deep in a tactical anime series, or traveling to find fresh perspectives.",
         about_interests: ["Football", "Anime", "Travel"],
         software_stack: DEFAULT_SOFTWARES,
+        project_order: [] as string[],
         services: [
             { icon: "Palette", title: "Branding", description: "Visual systems that resonate and endure." },
             { icon: "Layout", title: "UI/UX Design", description: "Clean, user-centric digital interfaces." },
@@ -52,10 +56,32 @@ export default function SiteSettings() {
         setLoading(true);
         const { data } = await supabase.from('site_settings').select('*').single();
         if (data) {
+            let aboutData: any = {};
+            if (data.about_text) {
+                try {
+                    aboutData = JSON.parse(data.about_text);
+                } catch (e) {
+                    aboutData = { about_bio_1: data.about_text };
+                }
+            }
+
             setSettings((prev: any) => ({
                 ...prev,
-                ...data,
-                software_stack: data.software_stack && Array.isArray(data.software_stack) && data.software_stack.length > 0 ? data.software_stack : DEFAULT_SOFTWARES
+                hero_title: data.hero_title || prev.hero_title,
+                hero_subtitle: data.hero_subtitle || prev.hero_subtitle,
+                contact_email: data.contact_email || prev.contact_email,
+                services: data.services || prev.services,
+                social_links: data.social_links || prev.social_links,
+                about_heading: aboutData.about_heading || prev.about_heading,
+                about_bio_1: aboutData.about_bio_1 || prev.about_bio_1,
+                about_bio_2: aboutData.about_bio_2 || prev.about_bio_2,
+                about_bio_3: aboutData.about_bio_3 || prev.about_bio_3,
+                about_image: aboutData.about_image || prev.about_image,
+                about_beyond_title: aboutData.about_beyond_title || prev.about_beyond_title,
+                about_beyond_text: aboutData.about_beyond_text || prev.about_beyond_text,
+                about_interests: aboutData.about_interests || prev.about_interests,
+                software_stack: aboutData.software_stack && Array.isArray(aboutData.software_stack) && aboutData.software_stack.length > 0 ? aboutData.software_stack : DEFAULT_SOFTWARES,
+                project_order: aboutData.project_order || []
             }));
         }
         setLoading(false);
@@ -63,10 +89,40 @@ export default function SiteSettings() {
 
     const handleSave = async () => {
         setSaving(true);
-        const { error } = await supabase.from('site_settings').upsert({ id: 'main', ...settings });
-        if (error) alert(error.message);
-        else alert("Live site updated successfully!");
-        setSaving(false);
+        try {
+            const aboutPayload = {
+                about_heading: settings.about_heading,
+                about_bio_1: settings.about_bio_1,
+                about_bio_2: settings.about_bio_2,
+                about_bio_3: settings.about_bio_3,
+                about_image: settings.about_image,
+                about_beyond_title: settings.about_beyond_title,
+                about_beyond_text: settings.about_beyond_text,
+                about_interests: settings.about_interests,
+                software_stack: settings.software_stack,
+                project_order: settings.project_order
+            };
+
+            const payload = {
+                id: 'main',
+                hero_title: settings.hero_title,
+                hero_subtitle: settings.hero_subtitle,
+                contact_email: settings.contact_email,
+                services: settings.services,
+                social_links: settings.social_links,
+                about_text: JSON.stringify(aboutPayload)
+            };
+
+            const { error } = await supabase.from('site_settings').upsert(payload);
+            if (error) throw error;
+
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3500);
+        } catch (err: any) {
+            alert("Error saving settings: " + err.message);
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-zinc-200" size={48} /></div>;
@@ -294,6 +350,21 @@ export default function SiteSettings() {
                     </section>
                 </div>
             </div>
+
+            {/* Notification Toast */}
+            <AnimatePresence>
+                {showToast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 z-[100]"
+                    >
+                        <CheckCircle2 className="text-razzmatazz" size={20} />
+                        <span className="text-sm font-medium italic">Live site identity & about settings successfully deployed!</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
