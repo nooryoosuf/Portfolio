@@ -19,23 +19,18 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
             const file = e.target.files?.[0];
             if (!file) return;
 
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-            const filePath = `uploads/${fileName}`;
+            const formData = new FormData();
+            formData.append("file", file);
 
-            // Upload to Supabase Storage
-            const { error: uploadError } = await supabase.storage
-                .from('media')
-                .upload(filePath, file);
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
 
-            if (uploadError) throw uploadError;
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Upload failed");
 
-            // Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('media')
-                .getPublicUrl(filePath);
-
-            onChange(publicUrl);
+            onChange(data.url);
         } catch (error: any) {
             alert("Error uploading image: " + error.message);
         } finally {

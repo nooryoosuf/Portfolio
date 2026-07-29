@@ -1,17 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const projectRef = new URL(supabaseUrl).host.split(".")[0];
-
-const s3 = new S3Client({
-    region: "ap-southeast-1",
-    endpoint: `https://${projectRef}.storage.supabase.co`,
-    credentials: {
-        accessKeyId: process.env.SUPABASE_S3_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.SUPABASE_S3_SECRET_ACCESS_KEY!,
-    },
-});
+import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
     try {
@@ -26,19 +14,38 @@ export async function POST(request: NextRequest) {
         const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
         const filePath = `uploads/${fileName}`;
 
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        // Try uploading to 'media' first, or fallback to 'portfolio_website_bucket'
+        let bucketName = "media";
 
-        await s3.send(
-            new PutObjectCommand({
-                Bucket: "portfolio_website_bucket",
-                Key: filePath,
-                Body: buffer,
-                ContentType: file.type,
-            })
-        );
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
 
-        const publicUrl = `${supabaseUrl}/storage/v1/object/public/portfolio_website_bucket/${filePath}`;
+        let { error } = await supabase.storage
+            .from(bucketName)
+            .upload(filePath, buffer, {
+                contentType: file.type || "image/png",
+                upsert: true
+            });
+
+        if (error && error.message?.includes("not found")) {
+            bucketName = "portfolio_website_bucket";
+            const retry = await supabase.storage
+                .from(bucketName)
+                .upload(filePath, buffer, {
+                    contentType: file.type || "image/png",
+                    upsert: true
+                });
+            error = retry.error;
+        }
+
+        if (error) {
+            console.error("Supabase upload error:", error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(filePath);
 
         return NextResponse.json({ url: publicUrl });
     } catch (error: any) {
@@ -46,3 +53,4 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message || "Upload failed" }, { status: 500 });
     }
 }
+
