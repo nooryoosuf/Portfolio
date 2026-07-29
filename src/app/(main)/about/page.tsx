@@ -1,21 +1,60 @@
 "use client";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { User, Rocket, Coffee, Heart, Code, Palette, Laptop } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import SoftwareIcon from "@/components/SoftwareIcon";
 
-const softwares = [
-    { name: "Design", icon: Palette, desc: "Aesthetic vision" },
-    { name: "Development", icon: Code, desc: "Technical implementation" },
-    { name: "Strategy", icon: Rocket, desc: "Purposeful planning" },
-    { name: "Research", icon: Laptop, desc: "User insight" },
-];
-
-const stats = [
-    { label: "Years Experience", value: "8+" },
-    { label: "Completed Projects", value: "150+" },
-    { label: "Coffee Consumed", value: "∞" },
+const DEFAULT_SOFTWARES = [
+    { name: "MS Office", category: "Productivity Suite" },
+    { name: "Adobe Photoshop", category: "Photo & Raster Design" },
+    { name: "Adobe Illustrator", category: "Vector & Branding" },
+    { name: "Adobe Premiere Pro", category: "Video Editing & Motion" },
+    { name: "Adobe XD", category: "UI/UX Prototyping" },
+    { name: "Figma", category: "Interface & Design Systems" },
 ];
 
 export default function About() {
+    const [settings, setSettings] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchSettings() {
+            try {
+                const { data } = await supabase.from('site_settings').select('*').single();
+                if (data) setSettings(data);
+            } catch (err) {
+                console.error("Error fetching about settings:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchSettings();
+    }, []);
+
+    if (loading) {
+        return <div className="min-h-screen flex justify-center items-center"><Loader2 className="animate-spin text-zinc-100" size={48} /></div>;
+    }
+
+    const heading = settings?.about_heading || "Creativity meets purpose.";
+    const bio1 = settings?.about_bio_1 || "Based in the Maldives, I am a multi-disciplinary designer focused on building digital products that are as functional as they are beautiful.";
+    const bio2 = settings?.about_bio_2 || "I believe in the power of minimalism—not just as an aesthetic choice, but as a commitment to clarity, accessibility, and user-centricity.";
+    const bio3 = settings?.about_bio_3 || "From brand identities to complex user interfaces, my goal is to strip away the noise and focus on what truly matters.";
+    const beyondTitle = settings?.about_beyond_title || "Beyond the Screen.";
+    const beyondText = settings?.about_beyond_text || "When I'm not designing, you'll find me on the football pitch, deep in a tactical anime series, or traveling to find fresh perspectives.";
+    const interests = Array.isArray(settings?.about_interests) && settings.about_interests.length > 0 
+        ? settings.about_interests 
+        : ["Football", "Anime", "Travel"];
+    const softwareList = Array.isArray(settings?.software_stack) && settings.software_stack.length > 0
+        ? settings.software_stack
+        : DEFAULT_SOFTWARES;
+
+    const stats = [
+        { label: "Years Experience", value: "8+" },
+        { label: "Completed Projects", value: "150+" },
+        { label: "Coffee Consumed", value: "∞" },
+    ];
+
     return (
         <div className="pt-40 pb-32 px-6 bg-white min-h-screen">
             <div className="max-w-6xl mx-auto">
@@ -27,26 +66,17 @@ export default function About() {
                         transition={{ duration: 0.8 }}
                     >
                         <span className="text-zinc-400 text-sm font-medium tracking-widest uppercase mb-4 block">The Narrative</span>
-                        <h1 className="text-6xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 mb-12">
-                            Creativity <br />
-                            meets <br />
-                            <span className="text-razzmatazz">purpose.</span>
+                        <h1 className="text-5xl md:text-7xl font-heading font-medium tracking-tight text-zinc-900 mb-12 leading-tight">
+                            {heading.split(" ").map((word: string, i: number) => (
+                                <span key={i} className={i % 2 === 1 ? "text-razzmatazz" : ""}>{word} </span>
+                            ))}
                         </h1>
                         <div className="space-y-8 text-zinc-500 text-lg md:text-xl font-light leading-relaxed max-w-xl">
-                            <p>
-                                Based in the Maldives, I am a multi-disciplinary designer focused on building digital products that are as <span className="text-razzmatazz">functional</span> as they are <span className="text-razzmatazz">beautiful</span>.
-                            </p>
-                            <p>
-                                I believe in the power of <span className="text-razzmatazz underline decoration-zinc-100 decoration-4 underline-offset-4">minimalism</span>—not just as an aesthetic choice, but as a commitment to clarity, accessibility, and user-centricity.
-                            </p>
-                            <p>
-                                From brand identities to complex user interfaces, my goal is to strip away the noise and focus on what <span className="text-razzmatazz">truly matters</span> to the user and the business.
-                            </p>
-
+                            <p>{bio1}</p>
+                            <p>{bio2}</p>
+                            <p>{bio3}</p>
                         </div>
-
                     </motion.div>
-
 
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -54,16 +84,26 @@ export default function About() {
                         transition={{ delay: 0.2, duration: 1 }}
                         className="relative"
                     >
-                        <div className="aspect-[4/5] bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 flex items-center justify-center relative group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-200 opacity-50" />
-                            <User size={120} className="text-zinc-200 group-hover:scale-110 transition-transform duration-1000" />
+                        <div className="aspect-[4/5] bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 flex items-center justify-center relative group shadow-sm">
+                            {settings?.about_image ? (
+                                <img
+                                    src={settings.about_image}
+                                    alt="About Me"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                                />
+                            ) : (
+                                <>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-200 opacity-50" />
+                                    <User size={120} className="text-zinc-200 group-hover:scale-110 transition-transform duration-1000" />
+                                </>
+                            )}
                         </div>
                     </motion.div>
                 </div>
 
-                {/* stats */}
+                {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32 py-12 border-y border-zinc-100">
-                    {stats.map((stat, i) => (
+                    {stats.map((stat) => (
                         <div key={stat.label} className="text-center">
                             <span className="block text-4xl md:text-5xl font-heading font-medium text-zinc-900 mb-2">{stat.value}</span>
                             <span className="text-xs uppercase tracking-widest text-zinc-400 font-medium">{stat.label}</span>
@@ -71,48 +111,53 @@ export default function About() {
                     ))}
                 </div>
 
-                {/* Approach Section */}
+                {/* Software Stack & Tools Section */}
                 <section className="mb-32">
-                    <header className="mb-20">
-                        <span className="text-zinc-400 text-sm font-medium tracking-widest uppercase mb-4 block">Expertise</span>
-                        <h2 className="text-4xl font-heading font-medium tracking-tight text-zinc-900">How I work.</h2>
+                    <header className="mb-16">
+                        <span className="text-zinc-400 text-sm font-medium tracking-widest uppercase mb-4 block">Software & Tools</span>
+                        <h2 className="text-4xl font-heading font-medium tracking-tight text-zinc-900">
+                            Applications I <span className="text-razzmatazz">master</span>.
+                        </h2>
                     </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {softwares.map((sw, i) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                        {softwareList.map((sw: any, i: number) => (
                             <motion.div
-                                key={sw.name}
+                                key={sw.name || i}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
+                                transition={{ delay: i * 0.08 }}
                                 viewport={{ once: true }}
-                                className="p-8 rounded-3xl bg-zinc-50 border border-transparent hover:border-zinc-200 transition-all duration-300"
+                                className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 hover:border-zinc-200 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group"
                             >
-                                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-zinc-900 shadow-sm mb-6">
-                                    <sw.icon size={20} />
+                                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-zinc-100 mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <SoftwareIcon name={sw.name} size={28} />
                                 </div>
-                                <h3 className="text-lg font-medium text-zinc-900 mb-2">{sw.name}</h3>
-                                <p className="text-zinc-500 text-sm font-light">{sw.desc}</p>
+                                <h3 className="text-sm font-medium text-zinc-900 mb-1">{sw.name}</h3>
+                                <p className="text-zinc-400 text-[11px] font-light italic">{sw.category || "Tool"}</p>
                             </motion.div>
                         ))}
                     </div>
                 </section>
 
-                {/* Personal Section */}
-                <section className="p-12 md:p-24 bg-zinc-900 rounded-[4rem] text-white">
-                    <div className="max-w-3xl">
+                {/* Beyond the Screen Section */}
+                <section className="p-12 md:p-24 bg-zinc-900 rounded-[4rem] text-white relative overflow-hidden shadow-2xl">
+                    <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-razzmatazz/15 rounded-full blur-3xl pointer-events-none" />
+                    <div className="max-w-3xl relative z-10">
                         <header className="mb-12">
                             <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight mb-8 underline decoration-zinc-700 underline-offset-8">
-                                Beyond the <br /> Screen.
+                                {beyondTitle}
                             </h2>
                             <p className="text-zinc-400 text-xl font-light leading-relaxed">
-                                When I'm not designing, you'll find me on the football pitch, deep in a tactical anime series, or traveling to find fresh perspectives. I'm a firm believer that life outside of work fuels the creativity inside it.
+                                {beyondText}
                             </p>
                         </header>
-                        <div className="flex gap-4">
-                            <span className="px-6 py-2 bg-white/5 rounded-full text-xs uppercase tracking-widest border border-white/10">Football</span>
-                            <span className="px-6 py-2 bg-white/5 rounded-full text-xs uppercase tracking-widest border border-white/10">Anime</span>
-                            <span className="px-6 py-2 bg-white/5 rounded-full text-xs uppercase tracking-widest border border-white/10">Travel</span>
+                        <div className="flex flex-wrap gap-4">
+                            {interests.map((item: string) => (
+                                <span key={item} className="px-6 py-2 bg-white/5 rounded-full text-xs uppercase tracking-widest border border-white/10 text-zinc-300">
+                                    {item}
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </section>
@@ -120,4 +165,3 @@ export default function About() {
         </div>
     );
 }
-
