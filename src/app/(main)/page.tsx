@@ -24,11 +24,24 @@ export default function Home() {
             try {
                 const [settingsRes, projectsRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
-                    supabase.from('projects').select('*').order('created_at', { ascending: false }).limit(3)
+                    supabase.from('projects').select('*')
                 ]);
 
+                let rawProjects = projectsRes.data || [];
+                const projectOrder = settingsRes.data?.project_order;
+                if (projectOrder && Array.isArray(projectOrder)) {
+                    const orderMap = new Map(projectOrder.map((id: string, idx: number) => [id, idx]));
+                    rawProjects.sort((a, b) => {
+                        const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : 999;
+                        const orderB = orderMap.has(b.id) ? orderMap.get(b.id)! : 999;
+                        return orderA - orderB;
+                    });
+                } else {
+                    rawProjects.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                }
+
                 if (settingsRes.data) setSettings(settingsRes.data);
-                if (projectsRes.data) setFeaturedProjects(projectsRes.data);
+                setFeaturedProjects(rawProjects.slice(0, 3));
             } catch (err) {
                 console.error("Error:", err);
             } finally {

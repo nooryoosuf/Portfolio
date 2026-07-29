@@ -12,13 +12,27 @@ export default function Portfolio() {
     useEffect(() => {
         async function fetchProjects() {
             try {
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                const [projectsRes, settingsRes] = await Promise.all([
+                    supabase.from('projects').select('*'),
+                    supabase.from('site_settings').select('project_order').single()
+                ]);
 
-                if (error) throw error;
-                setProjects(data || []);
+                if (projectsRes.error) throw projectsRes.error;
+                let rawProjects = projectsRes.data || [];
+                const projectOrder = settingsRes.data?.project_order;
+
+                if (projectOrder && Array.isArray(projectOrder)) {
+                    const orderMap = new Map(projectOrder.map((id: string, idx: number) => [id, idx]));
+                    rawProjects.sort((a, b) => {
+                        const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : 999;
+                        const orderB = orderMap.has(b.id) ? orderMap.get(b.id)! : 999;
+                        return orderA - orderB;
+                    });
+                } else {
+                    rawProjects.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                }
+
+                setProjects(rawProjects);
             } catch (err) {
                 console.error("Error fetching projects:", err);
             } finally {
