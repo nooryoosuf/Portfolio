@@ -6,10 +6,11 @@ import { supabase } from "@/lib/supabase";
 export default function SiteSettings() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [settings, setSettings] = useState({
+    const [settings, setSettings] = useState<any>({
         hero_title: "Crafting digital experiences with minimal intent.",
         hero_subtitle: "Helping brands stand out through purposeful design and visual storytelling.",
         about_text: "",
+        contact_email: "nooor.yoosuf@gmail.com",
         services: [
             { icon: "Palette", title: "Branding", description: "Visual systems that resonate and endure." },
             { icon: "Layout", title: "UI/UX Design", description: "Clean, user-centric digital interfaces." },
@@ -17,9 +18,10 @@ export default function SiteSettings() {
             { icon: "PenTool", title: "Illustration", description: "Unique artwork to set your brand apart." }
         ],
         social_links: [
-            { platform: "Instagram", url: "" },
-            { platform: "Github", url: "" },
-            { platform: "Linkedin", url: "" }
+            { platform: "Instagram", handle: "@nooryoosuf", url: "https://instagram.com" },
+            { platform: "Facebook", handle: "Noor Yoosuf", url: "https://facebook.com" },
+            { platform: "Twitter", handle: "@nooryoosuf", url: "https://x.com" },
+            { platform: "Github", handle: "nooryoosuf", url: "https://github.com/nooryoosuf" }
         ]
     });
 
@@ -106,7 +108,7 @@ export default function SiteSettings() {
                         </div>
 
                         <div className="space-y-6">
-                            {settings.services.map((service, i) => (
+                            {settings.services?.map((service: any, i: number) => (
                                 <div key={i} className="p-6 bg-zinc-50 border border-zinc-100 rounded-xl space-y-4">
                                     <div className="flex justify-between items-start">
                                         <div className="grid grid-cols-2 gap-4 flex-1">
@@ -136,7 +138,7 @@ export default function SiteSettings() {
                                             </select>
                                         </div>
                                         <button
-                                            onClick={() => setSettings({ ...settings, services: settings.services.filter((_, idx) => idx !== i) })}
+                                            onClick={() => setSettings({ ...settings, services: settings.services.filter((_: any, idx: number) => idx !== i) })}
                                             className="ml-4 p-2 text-zinc-300 hover:text-red-500 transition-colors"
                                         >
                                             <Trash2 size={16} />
@@ -160,28 +162,60 @@ export default function SiteSettings() {
                 </div>
 
                 <div className="lg:col-span-4 space-y-8">
-                    {/* Social Section */}
-                    <section className="p-8 bg-white border border-zinc-200 rounded-2xl shadow-sm">
-                        <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-8 flex items-center gap-2">
-                            Connect Hub
+                    {/* Social & Contact Section */}
+                    <section className="p-8 bg-white border border-zinc-200 rounded-2xl shadow-sm space-y-6">
+                        <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                            Connect & Social Handles
                         </h2>
-                        <div className="space-y-6">
-                            {settings.social_links.map((social, i) => (
-                                <div key={i} className="space-y-2">
-                                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-tighter">{social.platform}</label>
-                                    <input
-                                        type="text"
-                                        value={social.url}
-                                        onChange={(e) => {
-                                            const newLinks = [...settings.social_links];
-                                            newLinks[i].url = e.target.value;
-                                            setSettings({ ...settings, social_links: newLinks });
-                                        }}
-                                        className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-2 px-3 text-sm text-zinc-900 focus:outline-none focus:border-zinc-400 transition-colors"
-                                        placeholder={`Link to ${social.platform}...`}
-                                    />
-                                </div>
-                            ))}
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Primary Contact Email</label>
+                            <input
+                                type="email"
+                                value={settings.contact_email || "nooor.yoosuf@gmail.com"}
+                                onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
+                                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-sm text-zinc-900 focus:outline-none focus:border-zinc-400 transition-colors font-mono"
+                                placeholder="nooor.yoosuf@gmail.com"
+                            />
+                        </div>
+
+                        <div className="space-y-6 pt-4 border-t border-zinc-100">
+                            {["Instagram", "Facebook", "Twitter", "Github"].map((platform) => {
+                                const existing = settings.social_links?.find((s: any) => s.platform?.toLowerCase() === platform.toLowerCase()) || { platform, handle: "", url: "" };
+                                return (
+                                    <div key={platform} className="p-4 bg-zinc-50 border border-zinc-100 rounded-xl space-y-3">
+                                        <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">{platform}</span>
+                                        <div className="space-y-2">
+                                            <input
+                                                type="text"
+                                                value={existing.handle || ""}
+                                                onChange={(e) => {
+                                                    const links = settings.social_links || [];
+                                                    const idx = links.findIndex((s: any) => s.platform?.toLowerCase() === platform.toLowerCase());
+                                                    const updated = { platform, handle: e.target.value, url: existing.url || "" };
+                                                    const newLinks = idx >= 0 ? links.map((s: any, i: number) => i === idx ? updated : s) : [...links, updated];
+                                                    setSettings({ ...settings, social_links: newLinks });
+                                                }}
+                                                className="w-full bg-white border border-zinc-200 rounded-lg py-2 px-3 text-xs text-zinc-900 focus:outline-none placeholder:text-zinc-300"
+                                                placeholder={`Username / Handle (e.g. @${platform.toLowerCase()})`}
+                                            />
+                                            <input
+                                                type="text"
+                                                value={existing.url || ""}
+                                                onChange={(e) => {
+                                                    const links = settings.social_links || [];
+                                                    const idx = links.findIndex((s: any) => s.platform?.toLowerCase() === platform.toLowerCase());
+                                                    const updated = { platform, handle: existing.handle || "", url: e.target.value };
+                                                    const newLinks = idx >= 0 ? links.map((s: any, i: number) => i === idx ? updated : s) : [...links, updated];
+                                                    setSettings({ ...settings, social_links: newLinks });
+                                                }}
+                                                className="w-full bg-white border border-zinc-200 rounded-lg py-2 px-3 text-xs text-zinc-900 focus:outline-none placeholder:text-zinc-300 font-mono"
+                                                placeholder={`Full URL (https://${platform.toLowerCase()}.com/...)`}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </section>
                 </div>

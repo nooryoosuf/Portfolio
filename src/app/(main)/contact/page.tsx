@@ -1,13 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, CheckCircle2, Mail, ArrowUpRight, MessageSquare } from "lucide-react";
+import { Send, CheckCircle2, ArrowUpRight, MessageSquare } from "lucide-react";
 import { FaInstagram, FaFacebook, FaTwitter, FaGithub, FaEnvelope } from "react-icons/fa6";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function ContactPage() {
     const [submitted, setSubmitted] = useState(false);
     const [sending, setSending] = useState(false);
+    const [contactEmail, setContactEmail] = useState("nooor.yoosuf@gmail.com");
+    const [socials, setSocials] = useState([
+        { name: "Instagram", handle: "@nooryoosuf", href: "https://instagram.com", icon: <FaInstagram size={24} />, color: "hover:text-pink-500 hover:border-pink-200" },
+        { name: "Facebook", handle: "Noor Yoosuf", href: "https://facebook.com", icon: <FaFacebook size={24} />, color: "hover:text-blue-600 hover:border-blue-200" },
+        { name: "Twitter / X", handle: "@nooryoosuf", href: "https://x.com", icon: <FaTwitter size={24} />, color: "hover:text-zinc-900 hover:border-zinc-400" },
+        { name: "GitHub", handle: "nooryoosuf", href: "https://github.com/nooryoosuf", icon: <FaGithub size={24} />, color: "hover:text-zinc-900 hover:border-zinc-400" }
+    ]);
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -15,52 +24,47 @@ export default function ContactPage() {
         message: ""
     });
 
+    useEffect(() => {
+        async function fetchSettings() {
+            try {
+                const { data } = await supabase.from('site_settings').select('*').single();
+                if (data) {
+                    if (data.contact_email) setContactEmail(data.contact_email);
+                    if (data.social_links && Array.isArray(data.social_links)) {
+                        setSocials(prev => prev.map(s => {
+                            const found = data.social_links.find((l: any) => l.platform?.toLowerCase().includes(s.name.split(' ')[0].toLowerCase()));
+                            if (found) {
+                                return {
+                                    ...s,
+                                    handle: found.handle || s.handle,
+                                    href: found.url || s.href
+                                };
+                            }
+                            return s;
+                        }));
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading social settings:", err);
+            }
+        }
+        fetchSettings();
+    }, []);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setSending(true);
 
-        // Open mailto link with friendly message fallback
         const mailtoSubject = encodeURIComponent(formData.subject || `Message from ${formData.name}`);
         const mailtoBody = encodeURIComponent(`Hi Noor,\n\n${formData.message}\n\nFrom: ${formData.name} (${formData.email})`);
         
         setTimeout(() => {
             setSending(false);
             setSubmitted(true);
-            window.location.href = `mailto:nooor.yoosuf@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+            window.location.href = `mailto:${contactEmail}?subject=${mailtoSubject}&body=${mailtoBody}`;
             setTimeout(() => setSubmitted(false), 5000);
         }, 600);
     };
-
-    const socials = [
-        {
-            name: "Instagram",
-            handle: "@nooryoosuf",
-            href: "https://instagram.com",
-            icon: <FaInstagram size={24} />,
-            color: "hover:text-pink-500 hover:border-pink-200"
-        },
-        {
-            name: "Facebook",
-            handle: "Noor Yoosuf",
-            href: "https://facebook.com",
-            icon: <FaFacebook size={24} />,
-            color: "hover:text-blue-600 hover:border-blue-200"
-        },
-        {
-            name: "Twitter / X",
-            handle: "@nooryoosuf",
-            href: "https://x.com",
-            icon: <FaTwitter size={24} />,
-            color: "hover:text-zinc-900 hover:border-zinc-400"
-        },
-        {
-            name: "GitHub",
-            handle: "nooryoosuf",
-            href: "https://github.com/nooryoosuf",
-            icon: <FaGithub size={24} />,
-            color: "hover:text-zinc-900 hover:border-zinc-400"
-        }
-    ];
 
     return (
         <div className="pt-40 pb-32 px-6 bg-white min-h-screen">
@@ -173,10 +177,10 @@ export default function ContactPage() {
                             <FaEnvelope size={32} className="text-razzmatazz mb-6" />
                             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-400 block mb-2">Direct Mail</span>
                             <a
-                                href="mailto:nooor.yoosuf@gmail.com"
+                                href={`mailto:${contactEmail}`}
                                 className="text-xl md:text-2xl font-heading font-medium hover:text-razzmatazz transition-colors break-all block mb-4"
                             >
-                                nooor.yoosuf@gmail.com
+                                {contactEmail}
                             </a>
                             <p className="text-zinc-400 text-xs font-light italic">
                                 Available for freelance opportunities, full-time roles, and technical consulting.
