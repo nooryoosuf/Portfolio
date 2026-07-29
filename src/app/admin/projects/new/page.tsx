@@ -64,21 +64,25 @@ export default function NewProject() {
         setLoading(true);
 
         try {
-            const { role, ...restFormData } = formData;
-            const blocksWithMeta = [
-                { type: 'meta', role: role || 'Lead Designer' },
-                ...(formData.content_blocks || []).filter((b: any) => b.type !== 'meta')
-            ];
+            const insertPayload = {
+                title: formData.title,
+                category: formData.category,
+                slug: formData.slug || formData.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+                year: formData.year,
+                client: formData.client,
+                color: formData.color,
+                description: formData.description,
+                services: formData.services || [],
+                featured_image: formData.featured_image || '',
+                content_blocks: [
+                    { type: 'meta', role: formData.role || 'Lead Designer' },
+                    ...(formData.content_blocks || []).filter((b: any) => b.type !== 'meta')
+                ]
+            };
 
             const { error } = await supabase
                 .from('projects')
-                .insert([
-                    {
-                        ...restFormData,
-                        content_blocks: blocksWithMeta,
-                        slug: formData.slug || formData.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
-                    }
-                ]);
+                .insert([insertPayload]);
 
             if (error) throw error;
             router.push("/admin/projects");
