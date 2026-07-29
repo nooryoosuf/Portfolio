@@ -69,7 +69,7 @@ export default function SiteSettings() {
                 ...prev,
                 hero_title: data.hero_title || prev.hero_title,
                 hero_subtitle: data.hero_subtitle || prev.hero_subtitle,
-                contact_email: data.contact_email || prev.contact_email,
+                contact_email: aboutData.contact_email || prev.contact_email,
                 services: data.services || prev.services,
                 social_links: data.social_links || prev.social_links,
                 about_heading: aboutData.about_heading || prev.about_heading,
@@ -100,14 +100,14 @@ export default function SiteSettings() {
                 about_beyond_text: settings.about_beyond_text,
                 about_interests: settings.about_interests,
                 software_stack: settings.software_stack,
-                project_order: settings.project_order
+                project_order: settings.project_order,
+                contact_email: settings.contact_email
             };
 
             const payload = {
                 id: 'main',
                 hero_title: settings.hero_title,
                 hero_subtitle: settings.hero_subtitle,
-                contact_email: settings.contact_email,
                 services: settings.services,
                 social_links: settings.social_links,
                 about_text: JSON.stringify(aboutPayload)

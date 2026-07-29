@@ -29,7 +29,13 @@ export default function ContactPage() {
             try {
                 const { data } = await supabase.from('site_settings').select('*').single();
                 if (data) {
-                    if (data.contact_email) setContactEmail(data.contact_email);
+                    let aboutData: any = {};
+                    if (data.about_text) {
+                        try { aboutData = JSON.parse(data.about_text); } catch (e) {}
+                    }
+                    if (aboutData.contact_email || data.contact_email) {
+                        setContactEmail(aboutData.contact_email || data.contact_email);
+                    }
                     if (data.social_links && Array.isArray(data.social_links)) {
                         setSocials(prev => prev.map(s => {
                             const found = data.social_links.find((l: any) => l.platform?.toLowerCase().includes(s.name.split(' ')[0].toLowerCase()));
