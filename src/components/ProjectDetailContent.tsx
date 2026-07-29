@@ -7,18 +7,31 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import BlockRenderer from "@/components/BlockRenderer";
 
-export default function ProjectDetailContent({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
+export default function ProjectDetailContent({ params }: { params: any }) {
     const [project, setProject] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchProject() {
             try {
+                let slugVal = "";
+                if (params && typeof params.then === 'function') {
+                    const resolved = await params;
+                    slugVal = resolved?.slug || "";
+                } else if (params && params.slug) {
+                    slugVal = params.slug;
+                }
+
+                if (!slugVal) {
+                    setProject(null);
+                    setLoading(false);
+                    return;
+                }
+
                 const { data, error } = await supabase
                     .from('projects')
                     .select('*')
-                    .eq('slug', slug)
+                    .eq('slug', slugVal)
                     .single();
 
                 if (error || !data) {
@@ -33,7 +46,7 @@ export default function ProjectDetailContent({ params }: { params: Promise<{ slu
             }
         }
         fetchProject();
-    }, [slug]);
+    }, [params]);
 
     if (loading) {
         return (

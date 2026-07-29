@@ -62,9 +62,9 @@ export default function Home() {
 
     if (loading) return <div className="min-h-screen flex justify-center items-center"><Loader2 className="animate-spin text-zinc-100" size={48} /></div>;
 
-    const heroTitle = settings?.hero_title || "Crafting digital experiences with minimal intent.";
+    const heroTitle = typeof settings?.hero_title === 'string' ? settings.hero_title : "Crafting digital experiences with minimal intent.";
     const heroSubtitle = settings?.hero_subtitle || "Helping brands stand out through purposeful design and visual storytelling.";
-    const services = settings?.services || [];
+    const services = Array.isArray(settings?.services) ? settings.services : [];
 
     return (
         <div className="bg-white">
