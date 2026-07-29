@@ -1,14 +1,41 @@
+"use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Instagram, Twitter, Linkedin, Github } from "lucide-react";
-
-const socialLinks = [
-    { name: "LinkedIn", href: "#", icon: Linkedin },
-    { name: "Instagram", href: "#", icon: Instagram },
-    { name: "Twitter", href: "#", icon: Twitter },
-    { name: "Github", href: "#", icon: Github },
-];
+import { FaInstagram, FaFacebook, FaTwitter, FaGithub, FaEnvelope } from "react-icons/fa6";
+import { supabase } from "@/lib/supabase";
 
 export default function Footer() {
+    const [contactEmail, setContactEmail] = useState("nooor.yoosuf@gmail.com");
+    const [socials, setSocials] = useState([
+        { name: "Instagram", href: "https://instagram.com", icon: <FaInstagram size={18} /> },
+        { name: "Facebook", href: "https://facebook.com", icon: <FaFacebook size={18} /> },
+        { name: "Twitter", href: "https://x.com", icon: <FaTwitter size={18} /> },
+        { name: "Github", href: "https://github.com/nooryoosuf", icon: <FaGithub size={18} /> },
+    ]);
+
+    useEffect(() => {
+        async function fetchSettings() {
+            try {
+                const { data } = await supabase.from('site_settings').select('*').single();
+                if (data) {
+                    if (data.contact_email) setContactEmail(data.contact_email);
+                    if (data.social_links && Array.isArray(data.social_links)) {
+                        setSocials(prev => prev.map(s => {
+                            const found = data.social_links.find((l: any) => l.platform?.toLowerCase().includes(s.name.toLowerCase()));
+                            if (found && found.url) {
+                                return { ...s, href: found.url };
+                            }
+                            return s;
+                        }));
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading footer social settings:", err);
+            }
+        }
+        fetchSettings();
+    }, []);
+
     return (
         <footer className="bg-white border-t border-zinc-100 py-20 px-6">
             <div className="max-w-6xl mx-auto">
@@ -17,21 +44,25 @@ export default function Footer() {
                         <Link href="/" className="text-2xl font-heading font-semibold text-zinc-900 tracking-tight mb-4 block">
                             Noor<span className="text-razzmatazz">.</span>
                         </Link>
-
-
                         <p className="text-zinc-500 font-light max-w-sm">
                             Designing digital experiences with precision and purpose. Based in Maldives, working worldwide.
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-8">
+                    <div className="flex flex-wrap gap-12">
                         <div>
                             <h4 className="text-[13px] font-semibold text-zinc-900 uppercase tracking-widest mb-4">Navigation</h4>
                             <ul className="space-y-2">
-                                {["Home", "Portfolio", "About", "Blog"].map((item) => (
-                                    <li key={item}>
-                                        <Link href={`/${item.toLowerCase() === 'home' ? '' : item.toLowerCase()}`} className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors">
-                                            {item}
+                                {[
+                                    { name: "Home", href: "/" },
+                                    { name: "Portfolio", href: "/portfolio" },
+                                    { name: "About", href: "/about" },
+                                    { name: "Journal", href: "/blog" },
+                                    { name: "Connect", href: "/contact" }
+                                ].map((item) => (
+                                    <li key={item.name}>
+                                        <Link href={item.href} className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors">
+                                            {item.name}
                                         </Link>
                                     </li>
                                 ))}
@@ -41,9 +72,9 @@ export default function Footer() {
                             <h4 className="text-[13px] font-semibold text-zinc-900 uppercase tracking-widest mb-4">Contact</h4>
                             <ul className="space-y-2">
                                 <li>
-                                    <Link href="mailto:nooooryoooosuf@gmail.com" className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors">
-                                        Email
-                                    </Link>
+                                    <a href={`mailto:${contactEmail}`} className="text-[13px] text-zinc-500 hover:text-zinc-900 transition-colors">
+                                        {contactEmail}
+                                    </a>
                                 </li>
                                 <li>
                                     <span className="text-[13px] text-zinc-500">+960 9779872</span>
@@ -58,14 +89,17 @@ export default function Footer() {
                         &copy; {new Date().getFullYear()} Noor Yoosuf. Crafted with care.
                     </p>
                     <div className="flex gap-6">
-                        {socialLinks.map((social) => (
-                            <Link
+                        {socials.map((social) => (
+                            <a
                                 key={social.name}
                                 href={social.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={social.name}
                                 className="text-zinc-400 hover:text-zinc-900 transition-colors"
                             >
-                                <social.icon size={18} />
-                            </Link>
+                                {social.icon}
+                            </a>
                         ))}
                     </div>
                 </div>
@@ -73,4 +107,3 @@ export default function Footer() {
         </footer>
     );
 }
-
