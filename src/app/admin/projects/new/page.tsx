@@ -16,6 +16,7 @@ export default function NewProject() {
         slug: "",
         year: new Date().getFullYear().toString(),
         client: "",
+        role: "Lead Designer",
         color: "#ff0059",
         description: "", // This will be the "Brief"
         services: [] as string[],
@@ -287,6 +288,26 @@ export default function NewProject() {
                                     type="text"
                                     value={formData.category}
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Client</label>
+                                <input
+                                    type="text"
+                                    value={formData.client}
+                                    placeholder="e.g. Acme Corp"
+                                    onChange={(e) => setFormData({ ...formData, client: e.target.value })}
+                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Role</label>
+                                <input
+                                    type="text"
+                                    value={formData.role}
+                                    placeholder="e.g. Lead Designer"
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                     className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none transition-colors"
                                 />
                             </div>

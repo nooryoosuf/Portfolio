@@ -20,6 +20,7 @@ function EditProjectContent() {
         slug: "",
         year: "",
         client: "",
+        role: "",
         color: "#ff0059",
         description: "",
         services: [] as string[],
@@ -202,6 +203,14 @@ function EditProjectContent() {
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Category</label>
                             <input type="text" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none" />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Client</label>
+                            <input type="text" value={formData.client || ""} onChange={(e) => setFormData({ ...formData, client: e.target.value })} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none" />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Role</label>
+                            <input type="text" value={formData.role || ""} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
