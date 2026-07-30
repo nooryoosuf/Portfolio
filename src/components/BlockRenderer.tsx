@@ -24,12 +24,12 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                                 className="space-y-8 max-w-4xl"
                             >
                                 {block.title && (
-                                    <h3 className="text-3xl md:text-5xl font-heading font-medium text-zinc-900 tracking-tight mb-6">
+                                    <h3 className="text-3xl md:text-5xl font-heading font-medium text-zinc-900 dark:text-white tracking-tight mb-6">
                                         {block.title}
                                     </h3>
                                 )}
                                 {block.content && (
-                                    <p className="text-zinc-500 text-lg md:text-xl font-light leading-relaxed whitespace-pre-line">
+                                    <p className="text-zinc-500 dark:text-zinc-400 text-lg md:text-xl font-light leading-relaxed whitespace-pre-line">
                                         {block.content}
                                     </p>
                                 )}
@@ -50,7 +50,7 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                                         initial={{ opacity: 0, scale: 0.98 }}
                                         whileInView={{ opacity: 1, scale: 1 }}
                                         viewport={{ once: true }}
-                                        className="aspect-video md:aspect-auto rounded-[2rem] overflow-hidden border border-zinc-100 bg-zinc-50"
+                                        className="aspect-video md:aspect-auto rounded-[2rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900"
                                     >
                                         <img src={url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                     </motion.div>
@@ -65,14 +65,14 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                className="relative p-12 bg-zinc-50 rounded-[3rem] border border-zinc-100 max-w-4xl"
+                                className="relative p-12 bg-zinc-50 dark:bg-zinc-900/80 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 max-w-4xl"
                             >
                                 <Quote className="text-razzmatazz mb-6 opacity-20" size={48} />
-                                <p className="text-2xl md:text-4xl font-heading font-medium text-zinc-900 italic leading-tight mb-8">
+                                <p className="text-2xl md:text-4xl font-heading font-medium text-zinc-900 dark:text-white italic leading-tight mb-8">
                                     "{block.content}"
                                 </p>
                                 {block.author && (
-                                    <cite className="text-zinc-400 font-medium tracking-widest uppercase text-[10px] not-italic">
+                                    <cite className="text-zinc-400 dark:text-zinc-500 font-medium tracking-widest uppercase text-[10px] not-italic">
                                         — {block.author}
                                     </cite>
                                 )}
@@ -82,12 +82,12 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                     case 'list':
                         return (
                             <div key={index} className="space-y-8 max-w-4xl">
-                                {block.title && <h4 className="text-xl font-heading font-medium text-zinc-900">{block.title}</h4>}
+                                {block.title && <h4 className="text-xl font-heading font-medium text-zinc-900 dark:text-white">{block.title}</h4>}
                                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {block.items?.map((item: string, i: number) => (
                                         <li key={i} className="flex gap-4 items-start">
                                             <div className="w-1.5 h-1.5 bg-razzmatazz rounded-full mt-2.5 flex-shrink-0" />
-                                            <span className="text-zinc-600 text-lg font-light">{item}</span>
+                                            <span className="text-zinc-600 dark:text-zinc-400 text-lg font-light">{item}</span>
                                         </li>
                                     ))}
                                 </ul>

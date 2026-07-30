@@ -60,14 +60,14 @@ export default function Home() {
         fetchData();
     }, []);
 
-    if (loading) return <div className="min-h-screen flex justify-center items-center"><Loader2 className="animate-spin text-zinc-100" size={48} /></div>;
+    if (loading) return <div className="min-h-screen flex justify-center items-center bg-white dark:bg-zinc-950"><Loader2 className="animate-spin text-zinc-300 dark:text-zinc-700" size={48} /></div>;
 
     const heroTitle = typeof settings?.hero_title === 'string' ? settings.hero_title : "Crafting digital experiences with minimal intent.";
     const heroSubtitle = settings?.hero_subtitle || "Helping brands stand out through purposeful design and visual storytelling.";
     const services = Array.isArray(settings?.services) ? settings.services : [];
 
     return (
-        <div className="bg-white">
+        <div className="bg-white dark:bg-zinc-950 transition-colors duration-300">
             {/* Hero Section */}
             <section className="min-h-[90vh] flex flex-col items-center justify-center px-6 pt-20">
                 <div className="max-w-4xl mx-auto text-center">
@@ -76,29 +76,29 @@ export default function Home() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
                     >
-                        <span className="text-zinc-400 text-sm font-medium tracking-[0.2em] uppercase mb-6 block">
+                        <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-[0.2em] uppercase mb-6 block">
                             UI/UX & Graphic Designer
                         </span>
-                        <h1 className="text-5xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 leading-[1.1] mb-8 whitespace-pre-line">
+                        <h1 className="text-5xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white leading-[1.1] mb-8 whitespace-pre-line">
                             {heroTitle.split(' ').map((word: string, i: number) => (
                                 <span key={i} className={i % 3 === 0 ? "text-razzmatazz" : ""}>{word} </span>
                             ))}
                         </h1>
-                        <p className="max-w-xl mx-auto text-zinc-500 text-lg md:text-xl font-light leading-relaxed mb-12">
+                        <p className="max-w-xl mx-auto text-zinc-500 dark:text-zinc-400 text-lg md:text-xl font-light leading-relaxed mb-12">
                             {heroSubtitle}
                         </p>
 
                         <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                             <Link
                                 href="/portfolio"
-                                className="px-8 py-4 bg-zinc-900 text-white rounded-full font-medium hover:bg-zinc-800 transition-all duration-300 flex items-center gap-2 group shadow-sm"
+                                className="px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all duration-300 flex items-center gap-2 group shadow-sm"
                             >
                                 View Projects
                                 <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                             </Link>
                             <Link
                                 href="/about"
-                                className="text-zinc-600 font-medium hover:text-zinc-900 transition-colors"
+                                className="text-zinc-600 dark:text-zinc-400 font-medium hover:text-zinc-900 dark:hover:text-white transition-colors"
                             >
                                 Learn more about me
                             </Link>
@@ -110,21 +110,21 @@ export default function Home() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5, duration: 1.5 }}
-                    className="mt-24 w-px h-24 bg-gradient-to-b from-zinc-200 to-transparent"
+                    className="mt-24 w-px h-24 bg-gradient-to-b from-zinc-200 dark:from-zinc-800 to-transparent"
                 />
             </section>
 
             {/* Capabilities Section */}
-            <section className="section-padding bg-zinc-50/50">
+            <section className="section-padding bg-zinc-50/50 dark:bg-zinc-900/30">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
                         <div>
-                            <span className="text-zinc-400 text-sm font-medium tracking-widest uppercase mb-4 block">Services</span>
-                            <h2 className="text-4xl md:text-5xl font-heading font-medium tracking-tight text-zinc-900">
+                            <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-widest uppercase mb-4 block">Services</span>
+                            <h2 className="text-4xl md:text-5xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white">
                                 My approach to <span className="text-razzmatazz">design.</span>
                             </h2>
                         </div>
-                        <p className="max-w-md text-zinc-500 font-light">
+                        <p className="max-w-md text-zinc-500 dark:text-zinc-400 font-light">
                             I specialize in building <span className="text-razzmatazz">cohesive brand systems</span> and intuitive style guides.
                         </p>
                     </div>
@@ -146,10 +146,10 @@ export default function Home() {
             <section className="section-padding">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex justify-between items-end mb-16">
-                        <h2 className="text-3xl font-heading font-medium tracking-tight text-zinc-900">
+                        <h2 className="text-3xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white">
                             Selected Works
                         </h2>
-                        <Link href="/portfolio" className="text-sm font-medium text-zinc-400 hover:text-zinc-900 transition-colors underline underline-offset-4 decoration-zinc-200 hover:decoration-zinc-900">
+                        <Link href="/portfolio" className="text-sm font-medium text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors underline underline-offset-4 decoration-zinc-200 dark:decoration-zinc-800 hover:decoration-zinc-900 dark:hover:decoration-white">
                             View All
                         </Link>
                     </div>

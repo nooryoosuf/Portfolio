@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import ScrollManager from "@/components/ScrollManager";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -24,10 +25,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="light" style={{ colorScheme: 'light' }}>
-            <body className={`${inter.variable} ${outfit.variable} font-body antialiased selection:bg-black selection:text-white bg-white text-zinc-900`}>
-                <ScrollManager />
-                {children}
+        <html lang="en" className="light">
+            <body className={`${inter.variable} ${outfit.variable} font-body antialiased selection:bg-razzmatazz selection:text-white bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300`}>
+                <ThemeProvider>
+                    <ScrollManager />
+                    {children}
+                </ThemeProvider>
             </body>
         </html>
     );

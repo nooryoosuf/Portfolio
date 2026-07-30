@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -50,8 +50,8 @@ export default function ProjectDetailContent({ params }: { params: any }) {
 
     if (loading) {
         return (
-            <div className="pt-40 pb-32 px-6 flex justify-center items-center min-h-screen">
-                <Loader2 className="animate-spin text-zinc-100" size={48} />
+            <div className="pt-40 pb-32 px-6 flex justify-center items-center min-h-screen bg-white dark:bg-zinc-950">
+                <Loader2 className="animate-spin text-zinc-300 dark:text-zinc-700" size={48} />
             </div>
         );
     }
@@ -61,40 +61,49 @@ export default function ProjectDetailContent({ params }: { params: any }) {
     }
 
     return (
-        <div className="pt-40 pb-32 px-6 bg-white min-h-screen">
+        <div className="pt-40 pb-32 px-6 bg-white dark:bg-zinc-950 min-h-screen transition-colors duration-300">
             <div className="max-w-6xl mx-auto">
                 <Link
                     href="/portfolio"
-                    className="inline-flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors mb-12 group"
+                    className="inline-flex items-center gap-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors mb-12 group"
                 >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Back to Portfolio
                 </Link>
 
-                <header className="mb-24">
+                <header className="mb-20">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <span className="text-zinc-400 text-sm font-medium tracking-widest uppercase mb-4 block">
+                        <span className="text-razzmatazz text-xs font-bold uppercase tracking-[0.2em] mb-4 block">
                             {project.category}
                         </span>
-                        <h1 className="text-6xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 mb-12">
+                        <h1 className="text-6xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white mb-12 leading-[1.05]">
                             {project.title}
                         </h1>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-y border-zinc-100">
+                        {/* Metadata Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-8 border-y border-zinc-100 dark:border-zinc-800">
+                            {project.client && (
+                                <div className="space-y-1">
+                                    <span className="text-zinc-400 dark:text-zinc-500 text-[10px] uppercase tracking-widest font-bold block">Client</span>
+                                    <span className="text-zinc-900 dark:text-white font-medium">{project.client}</span>
+                                </div>
+                            )}
                             <div className="space-y-1">
-                                <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Client</span>
-                                <span className="text-zinc-900 font-medium">{project.client || "N/A"}</span>
+                                <span className="text-zinc-400 dark:text-zinc-500 text-[10px] uppercase tracking-widest font-bold block">Year</span>
+                                <span className="text-zinc-900 dark:text-white font-medium">{project.year}</span>
                             </div>
                             <div className="space-y-1">
-                                <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Year</span>
-                                <span className="text-zinc-900 font-medium">{project.year}</span>
+                                <span className="text-zinc-400 dark:text-zinc-500 text-[10px] uppercase tracking-widest font-bold block">Services</span>
+                                <span className="text-zinc-900 dark:text-white font-medium">
+                                    {Array.isArray(project.services) ? project.services.join(", ") : project.services}
+                                </span>
                             </div>
                             <div className="space-y-1 text-right">
-                                <span className="text-zinc-400 text-[10px] uppercase tracking-widest font-bold block">Role</span>
-                                <span className="text-zinc-900 font-medium">
+                                <span className="text-zinc-400 dark:text-zinc-500 text-[10px] uppercase tracking-widest font-bold block">Role</span>
+                                <span className="text-zinc-900 dark:text-white font-medium">
                                     {project.content_blocks?.find((b: any) => b.type === 'meta')?.role || project.role || "Lead Designer"}
                                 </span>
                             </div>
@@ -102,21 +111,16 @@ export default function ProjectDetailContent({ params }: { params: any }) {
                     </motion.div>
                 </header>
 
-                <div className="space-y-32">
-                    {/* Main Project Visual */}
-                    <div className="aspect-video bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 flex items-center justify-center relative group">
-                        <div className="absolute inset-0 opacity-10" style={{ backgroundColor: project.color }} />
-                        {project.featured_image ? (
-                            <img src={project.featured_image} alt={project.title} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="text-zinc-200 font-heading text-6xl font-medium select-none group-hover:scale-110 transition-transform duration-1000 uppercase tracking-tighter">
-                                {project.title}
-                            </div>
-                        )}
-                    </div>
+                <div className="space-y-20">
+                    {project.featured_image && (
+                        <div className="aspect-video bg-zinc-50 dark:bg-zinc-900 rounded-[3rem] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                            <img src={project.featured_image} alt={project.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                        </div>
+                    )}
 
-                    {/* Dynamic Blocks */}
-                    <BlockRenderer blocks={project.content_blocks} />
+                    <div className="max-w-3xl">
+                        <BlockRenderer blocks={project.content_blocks} />
+                    </div>
                 </div>
             </div>
         </div>

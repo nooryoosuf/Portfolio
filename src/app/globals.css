@@ -10,18 +10,27 @@
   --border: #e4e4e7;
 }
 
-/* Force Light Mode Styles */
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --accent: #fafafa;
+  --muted: #a1a1aa;
+  --border: #27272a;
+  color-scheme: dark;
+}
+
 html {
-  background-color: #ffffff !important;
-  color: #0a0a0b !important;
-  color-scheme: light !important;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
-  color: #0a0a0b;
-  background: #ffffff;
+  color: var(--foreground);
+  background-color: var(--background);
   overflow-x: hidden;
   font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 * {
@@ -31,7 +40,7 @@ body {
 }
 
 ::selection {
-  background: #18181b;
+  background: #ff0059;
   color: #ffffff;
 }
 
@@ -40,7 +49,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #ffffff;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -48,12 +57,15 @@ body {
   border-radius: 10px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
 }
 
 @layer base {
-
   h1,
   h2,
   h3,
@@ -69,13 +81,5 @@ body {
 }
 
 .glass {
-  @apply bg-white/70 backdrop-blur-md border border-white/20;
-}
-
-/* Ensure no dark mode overrides from plugins or browser settings */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #0a0a0b;
-  }
+  @apply bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-white/20 dark:border-zinc-800/40;
 }

@@ -46,7 +46,7 @@ export default function About() {
     }, []);
 
     if (loading) {
-        return <div className="min-h-screen flex justify-center items-center"><Loader2 className="animate-spin text-zinc-100" size={48} /></div>;
+        return <div className="min-h-screen flex justify-center items-center bg-white dark:bg-zinc-950"><Loader2 className="animate-spin text-zinc-300 dark:text-zinc-700" size={48} /></div>;
     }
 
     const heading = settings?.about_heading || "Creativity meets purpose.";
@@ -69,7 +69,7 @@ export default function About() {
     ];
 
     return (
-        <div className="pt-40 pb-32 px-6 bg-white min-h-screen">
+        <div className="pt-40 pb-32 px-6 bg-white dark:bg-zinc-950 min-h-screen transition-colors duration-300">
             <div className="max-w-6xl mx-auto">
                 {/* Hero Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-32">
@@ -78,13 +78,13 @@ export default function About() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <span className="text-zinc-400 text-sm font-medium tracking-widest uppercase mb-4 block">The Narrative</span>
-                        <h1 className="text-5xl md:text-7xl font-heading font-medium tracking-tight text-zinc-900 mb-12 leading-tight">
+                        <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-widest uppercase mb-4 block">The Narrative</span>
+                        <h1 className="text-5xl md:text-7xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white mb-12 leading-tight">
                             {heading.split(" ").map((word: string, i: number) => (
                                 <span key={i} className={i % 2 === 1 ? "text-razzmatazz" : ""}>{word} </span>
                             ))}
                         </h1>
-                        <div className="space-y-8 text-zinc-500 text-lg md:text-xl font-light leading-relaxed max-w-xl">
+                        <div className="space-y-8 text-zinc-500 dark:text-zinc-400 text-lg md:text-xl font-light leading-relaxed max-w-xl">
                             {bio1 && <p>{bio1}</p>}
                             {bio2 && <p>{bio2}</p>}
                             {bio3 && <p>{bio3}</p>}
@@ -97,7 +97,7 @@ export default function About() {
                         transition={{ delay: 0.2, duration: 1 }}
                         className="relative"
                     >
-                        <div className="aspect-[4/5] bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 flex items-center justify-center relative group shadow-sm">
+                        <div className="aspect-[4/5] bg-zinc-50 dark:bg-zinc-900 rounded-[3rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 flex items-center justify-center relative group shadow-sm">
                             {settings?.about_image ? (
                                 <img
                                     src={settings.about_image}
@@ -108,8 +108,8 @@ export default function About() {
                                 />
                             ) : (
                                 <>
-                                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-200 opacity-50" />
-                                    <User size={120} className="text-zinc-200 group-hover:scale-110 transition-transform duration-1000" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800 opacity-50" />
+                                    <User size={120} className="text-zinc-200 dark:text-zinc-800 group-hover:scale-110 transition-transform duration-1000" />
                                 </>
                             )}
                         </div>
@@ -117,11 +117,11 @@ export default function About() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32 py-12 border-y border-zinc-100">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32 py-12 border-y border-zinc-100 dark:border-zinc-800">
                     {stats.map((stat) => (
                         <div key={stat.label} className="text-center">
-                            <span className="block text-4xl md:text-5xl font-heading font-medium text-zinc-900 mb-2">{stat.value}</span>
-                            <span className="text-xs uppercase tracking-widest text-zinc-400 font-medium">{stat.label}</span>
+                            <span className="block text-4xl md:text-5xl font-heading font-medium text-zinc-900 dark:text-white mb-2">{stat.value}</span>
+                            <span className="text-xs uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-medium">{stat.label}</span>
                         </div>
                     ))}
                 </div>
@@ -129,8 +129,8 @@ export default function About() {
                 {/* Software Stack & Tools Section */}
                 <section className="mb-32">
                     <header className="mb-16">
-                        <span className="text-zinc-400 text-sm font-medium tracking-widest uppercase mb-4 block">Software & Tools</span>
-                        <h2 className="text-4xl font-heading font-medium tracking-tight text-zinc-900">
+                        <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-widest uppercase mb-4 block">Software & Tools</span>
+                        <h2 className="text-4xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white">
                             Applications I <span className="text-razzmatazz">master</span>.
                         </h2>
                     </header>
@@ -143,20 +143,20 @@ export default function About() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.08 }}
                                 viewport={{ once: true }}
-                                className="p-6 rounded-3xl bg-zinc-50 border border-zinc-100 hover:border-zinc-200 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group"
+                                className="p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-white dark:hover:bg-zinc-900 hover:shadow-xl dark:hover:shadow-black/40 transition-all duration-300 flex flex-col items-center text-center group"
                             >
-                                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-zinc-100 mb-4 group-hover:scale-110 transition-transform duration-300">
+                                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-950 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800 mb-4 group-hover:scale-110 transition-transform duration-300">
                                     <SoftwareIcon name={sw.name} size={28} />
                                 </div>
-                                <h3 className="text-sm font-medium text-zinc-900 mb-1">{sw.name}</h3>
-                                <p className="text-zinc-400 text-[11px] font-light italic">{sw.category || "Tool"}</p>
+                                <h3 className="text-sm font-medium text-zinc-900 dark:text-white mb-1">{sw.name}</h3>
+                                <p className="text-zinc-400 dark:text-zinc-500 text-[11px] font-light italic">{sw.category || "Tool"}</p>
                             </motion.div>
                         ))}
                     </div>
                 </section>
 
                 {/* Beyond the Screen Section */}
-                <section className="p-12 md:p-24 bg-zinc-900 rounded-[4rem] text-white relative overflow-hidden shadow-2xl">
+                <section className="p-12 md:p-24 bg-zinc-900 dark:bg-zinc-900/90 rounded-[4rem] text-white relative overflow-hidden shadow-2xl border border-transparent dark:border-zinc-800">
                     <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-razzmatazz/15 rounded-full blur-3xl pointer-events-none" />
                     <div className="max-w-3xl relative z-10">
                         <header className="mb-12">
