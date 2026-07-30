@@ -16,7 +16,7 @@ const navLinks = [
 export default function Header() {
     const [hoveredLink, setHoveredLink] = useState<string | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const { theme, toggleTheme } = useTheme();
+    const { theme, toggleTheme, mounted } = useTheme();
 
     return (
         <header className="fixed top-6 left-0 w-full z-50 px-6 pointer-events-none transform-gpu">
@@ -48,13 +48,23 @@ export default function Header() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Theme Toggle Button */}
+                    {/* Theme Toggle Button - Prominent Pill */}
                     <button
                         onClick={toggleTheme}
                         aria-label="Toggle dark mode"
-                        className="p-2 rounded-full text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors pointer-events-auto"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200/60 dark:border-zinc-700/60 text-xs font-medium pointer-events-auto shadow-sm"
                     >
-                        {theme === "dark" ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
+                        {mounted && theme === "dark" ? (
+                            <>
+                                <Sun size={15} className="text-amber-400" />
+                                <span className="hidden sm:inline">Light</span>
+                            </>
+                        ) : (
+                            <>
+                                <Moon size={15} className="text-zinc-600 dark:text-zinc-300" />
+                                <span className="hidden sm:inline">Dark</span>
+                            </>
+                        )}
                     </button>
 
                     {/* Desktop Connect Button */}
@@ -100,6 +110,22 @@ export default function Header() {
                                     {link.name === 'Connect' && <ArrowUpRight size={18} className="text-razzmatazz" />}
                                 </Link>
                             ))}
+
+                            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 mt-2">
+                                <button
+                                    onClick={() => {
+                                        toggleTheme();
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center justify-between text-base font-medium px-5 py-3.5 rounded-2xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition-all"
+                                >
+                                    <span>Theme</span>
+                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                                        {theme === "dark" ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
+                                        <span>{theme === "dark" ? "Dark Mode" : "Light Mode"}</span>
+                                    </div>
+                                </button>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
