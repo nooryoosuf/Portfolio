@@ -22,16 +22,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         setMounted(true);
         try {
-            const isDark = document.documentElement.classList.contains("dark") || 
-                localStorage.getItem("theme") === "dark" ||
-                (!localStorage.getItem("theme") && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            const saved = localStorage.getItem("theme");
+            let shouldBeDark = false;
 
-            if (isDark) {
+            if (saved === "dark") {
+                shouldBeDark = true;
+            } else if (saved === "light") {
+                shouldBeDark = false;
+            } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                shouldBeDark = true;
+            }
+
+            if (shouldBeDark) {
                 setTheme("dark");
                 document.documentElement.classList.add("dark");
+                document.documentElement.classList.remove("light");
             } else {
                 setTheme("light");
                 document.documentElement.classList.remove("dark");
+                document.documentElement.classList.add("light");
             }
         } catch (e) {
             console.error("Theme initialization error:", e);
@@ -39,15 +48,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const toggleTheme = () => {
-        const next = theme === "light" ? "dark" : "light";
-        setTheme(next);
+        const isCurrentlyDark = document.documentElement.classList.contains("dark");
+        const nextTheme: Theme = isCurrentlyDark ? "light" : "dark";
+
+        setTheme(nextTheme);
         try {
-            localStorage.setItem("theme", next);
+            localStorage.setItem("theme", nextTheme);
         } catch (e) {}
-        if (next === "dark") {
+
+        if (nextTheme === "dark") {
             document.documentElement.classList.add("dark");
+            document.documentElement.classList.remove("light");
         } else {
             document.documentElement.classList.remove("dark");
+            document.documentElement.classList.add("light");
         }
     };
 
