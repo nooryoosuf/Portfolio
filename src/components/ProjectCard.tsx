@@ -45,17 +45,16 @@ export default function ProjectCard({
             >
                 <div className={`${aspectClasses[aspect] || aspectClasses.portrait} w-full bg-zinc-50 relative overflow-hidden`}>
                     <div
-                        className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700"
+                        className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
                         style={{ backgroundColor: safeColor }}
                     />
-
-                    <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
                     {featured_image ? (
                         <img
                             src={featured_image}
                             alt={safeTitle}
-                            className="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:scale-105 transition-all duration-[1000ms]"
+                            style={{ filter: "none", WebkitFilter: "none", opacity: 1 }}
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -65,7 +64,7 @@ export default function ProjectCard({
                         </div>
                     )}
 
-                    <div className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-sm">
+                    <div className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-sm z-10">
                         <ArrowUpRight size={20} />
                     </div>
                 </div>
