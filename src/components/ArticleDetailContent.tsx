@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Loader2, Clock, Calendar } from "lucide-react";
@@ -7,18 +7,31 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import BlockRenderer from "@/components/BlockRenderer";
 
-export default function ArticleDetailContent({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
+export default function ArticleDetailContent({ params }: { params: any }) {
     const [post, setPost] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchPost() {
             try {
+                let slugVal = "";
+                if (params && typeof params.then === 'function') {
+                    const resolved = await params;
+                    slugVal = resolved?.slug || "";
+                } else if (params && params.slug) {
+                    slugVal = params.slug;
+                }
+
+                if (!slugVal) {
+                    setPost(null);
+                    setLoading(false);
+                    return;
+                }
+
                 const { data, error } = await supabase
                     .from('blog_posts')
                     .select('*')
-                    .eq('slug', slug)
+                    .eq('slug', slugVal)
                     .single();
 
                 if (error || !data) {
@@ -33,7 +46,7 @@ export default function ArticleDetailContent({ params }: { params: Promise<{ slu
             }
         }
         fetchPost();
-    }, [slug]);
+    }, [params]);
 
     if (loading) {
         return (
@@ -44,7 +57,17 @@ export default function ArticleDetailContent({ params }: { params: Promise<{ slu
     }
 
     if (!post) {
-        notFound();
+        return (
+            <div className="pt-40 pb-32 px-6 bg-white min-h-screen text-center">
+                <div className="max-w-xl mx-auto space-y-6">
+                    <h1 className="text-4xl font-heading font-medium text-zinc-900">Article Not Found</h1>
+                    <p className="text-zinc-500 font-light">The journal entry you are looking for does not exist or has been removed.</p>
+                    <Link href="/blog" className="inline-flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-full text-sm font-medium">
+                        <ArrowLeft size={16} /> Back to Journal
+                    </Link>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -64,18 +87,20 @@ export default function ArticleDetailContent({ params }: { params: Promise<{ slu
                         animate={{ opacity: 1, y: 0 }}
                     >
                         <div className="flex items-center gap-6 mb-8 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
-                            <span className="text-razzmatazz">{post.category}</span>
-                            <div className="flex items-center gap-1.5 italic"><Calendar size={12} /> {new Date(post.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
-                            <div className="flex items-center gap-1.5 italic"><Clock size={12} /> {post.read_time}</div>
+                            <span className="text-razzmatazz">{post.category || 'Design'}</span>
+                            <div className="flex items-center gap-1.5 italic"><Calendar size={12} /> {post.created_at ? new Date(post.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : 'Recently'}</div>
+                            <div className="flex items-center gap-1.5 italic"><Clock size={12} /> {post.read_time || '5 min read'}</div>
                         </div>
 
                         <h1 className="text-5xl md:text-7xl font-heading font-medium tracking-tight text-zinc-900 mb-12 leading-[1.05]">
                             {post.title}
                         </h1>
 
-                        <p className="text-2xl md:text-3xl font-heading font-light italic text-zinc-500 mb-12 leading-relaxed">
-                            "{post.description}"
-                        </p>
+                        {post.description && (
+                            <p className="text-2xl md:text-3xl font-heading font-light italic text-zinc-500 mb-12 leading-relaxed">
+                                "{post.description}"
+                            </p>
+                        )}
                     </motion.div>
                 </header>
 
