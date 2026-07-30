@@ -63,7 +63,7 @@ export default function Blog() {
                                         transition={{ delay: index * 0.1 }}
                                         className="group py-16 transition-all duration-300 hover:px-8 hover:bg-zinc-50 dark:hover:bg-zinc-900/60 rounded-2xl"
                                     >
-                                        <Link href={`/blog/post?slug=${post.slug}`} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                                        <Link href={`/blog/${post.slug}`} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                                             <div className="max-w-3xl">
                                                 <div className="flex gap-4 items-center mb-6">
                                                     <span className="text-zinc-900 dark:text-zinc-100 text-[10px] uppercase tracking-widest font-semibold px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full">

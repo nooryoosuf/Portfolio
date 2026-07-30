@@ -285,7 +285,7 @@ export default function AdminProjects() {
 
                                 <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest italic">{project.role || "Lead Designer"}</span>
-                                    <Link href={`/portfolio/project?slug=${project.slug}`} target="_blank" className="text-zinc-300 hover:text-zinc-900 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest italic group/link">
+                                    <Link href={`/portfolio/${project.slug}`} target="_blank" className="text-zinc-300 hover:text-zinc-900 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest italic group/link">
                                         Live Preview
                                         <ExternalLink size={12} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
                                     </Link>

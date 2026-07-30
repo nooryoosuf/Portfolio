@@ -137,7 +137,7 @@ export default function AdminBlog() {
 
                             <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
                                 <div className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest italic">{new Date(post.created_at).toLocaleDateString()}</div>
-                                <Link href={`/blog/post?slug=${post.slug}`} target="_blank" className="text-zinc-400 hover:text-razzmatazz transition-colors">
+                                <Link href={`/blog/${post.slug}`} target="_blank" className="text-zinc-400 hover:text-razzmatazz transition-colors">
                                     <ExternalLink size={16} />
                                 </Link>
                             </div>

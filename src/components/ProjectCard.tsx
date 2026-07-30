@@ -35,7 +35,7 @@ export default function ProjectCard({
     const initialChar = safeTitle.length > 0 ? safeTitle.charAt(0).toUpperCase() : "P";
 
     return (
-        <Link href={`/portfolio/project?slug=${safeSlug}`} className={span}>
+        <Link href={`/portfolio/${safeSlug}`} className={span}>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
