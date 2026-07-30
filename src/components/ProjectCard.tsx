@@ -55,7 +55,7 @@ export default function ProjectCard({
                         <img
                             src={featured_image}
                             alt={safeTitle}
-                            className="absolute inset-0 w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[2000ms]"
+                            className="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:scale-105 transition-all duration-[1000ms]"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
