@@ -11,7 +11,7 @@ export default function BlockRenderer({ blocks }: BlockProps) {
     const renderableBlocks = blocks.filter((b: any) => b && b.type !== 'meta');
 
     return (
-        <div className="space-y-32">
+        <div className="space-y-32 w-full">
             {renderableBlocks.map((block, index) => {
                 switch (block.type) {
                     case 'section':
@@ -21,7 +21,7 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                className="space-y-8 max-w-4xl"
+                                className="space-y-8 w-full"
                             >
                                 {block.title && (
                                     <h3 className="text-3xl md:text-5xl font-heading font-medium text-zinc-900 dark:text-white tracking-tight mb-6">
@@ -43,7 +43,7 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                             3: 'md:grid-cols-3',
                         };
                         return (
-                            <div key={index} className={`grid grid-cols-1 ${gridCols[block.columns] || 'md:grid-cols-1'} gap-8`}>
+                            <div key={index} className={`grid grid-cols-1 ${gridCols[block.columns] || 'md:grid-cols-1'} gap-8 w-full`}>
                                 {block.images?.map((url: string, i: number) => (
                                     <motion.div
                                         key={i}
@@ -65,7 +65,7 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                className="relative p-12 bg-zinc-50 dark:bg-zinc-900/80 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 max-w-4xl"
+                                className="relative p-12 bg-zinc-50 dark:bg-zinc-900/80 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 w-full"
                             >
                                 <Quote className="text-razzmatazz mb-6 opacity-20" size={48} />
                                 <p className="text-2xl md:text-4xl font-heading font-medium text-zinc-900 dark:text-white italic leading-tight mb-8">
@@ -81,7 +81,7 @@ export default function BlockRenderer({ blocks }: BlockProps) {
 
                     case 'list':
                         return (
-                            <div key={index} className="space-y-8 max-w-4xl">
+                            <div key={index} className="space-y-8 w-full">
                                 {block.title && <h4 className="text-xl font-heading font-medium text-zinc-900 dark:text-white">{block.title}</h4>}
                                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {block.items?.map((item: string, i: number) => (

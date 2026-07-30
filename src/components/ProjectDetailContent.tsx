@@ -118,7 +118,7 @@ export default function ProjectDetailContent({ params }: { params: any }) {
                         </div>
                     )}
 
-                    <div className="max-w-3xl">
+                    <div className="w-full">
                         <BlockRenderer blocks={project.content_blocks} />
                     </div>
                 </div>
