@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import ScrollManager from "@/components/ScrollManager";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
     return (
         <html lang="en" className="light" style={{ colorScheme: 'light' }}>
             <body className={`${inter.variable} ${outfit.variable} font-body antialiased selection:bg-black selection:text-white bg-white text-zinc-900`}>
+                <ScrollManager />
                 {children}
             </body>
         </html>
