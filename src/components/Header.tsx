@@ -48,13 +48,15 @@ export default function Header() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Theme Toggle Button - Prominent Pill */}
+                    {/* Theme Toggle Button */}
                     <button
                         onClick={toggleTheme}
                         aria-label="Toggle dark mode"
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200/60 dark:border-zinc-700/60 text-xs font-medium pointer-events-auto shadow-sm"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200/60 dark:border-zinc-700/60 text-xs font-medium pointer-events-auto shadow-sm min-w-[70px] justify-center"
                     >
-                        {mounted && theme === "dark" ? (
+                        {!mounted ? (
+                            <span className="w-3.5 h-3.5 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                        ) : theme === "dark" ? (
                             <>
                                 <Sun size={15} className="text-amber-400" />
                                 <span className="hidden sm:inline">Light</span>
