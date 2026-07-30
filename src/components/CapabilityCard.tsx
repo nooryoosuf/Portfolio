@@ -13,9 +13,10 @@ export default function CapabilityCard({ title, description, icon }: CapabilityC
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.2 }}
             whileHover={{ y: -5 }}
-            className="group p-8 rounded-3xl bg-white border border-zinc-100 hover:border-zinc-200 transition-all duration-300 hover:shadow-xl hover:shadow-zinc-200/50"
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="group p-8 rounded-3xl bg-white border border-zinc-100 hover:border-zinc-200 transition-all duration-300 hover:shadow-xl hover:shadow-zinc-200/50 transform-gpu"
         >
             <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-all duration-500 mb-6">
                 {icon}

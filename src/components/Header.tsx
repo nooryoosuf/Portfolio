@@ -17,8 +17,8 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        <header className="fixed top-6 left-0 w-full z-50 px-6 pointer-events-none">
-            <nav className="max-w-4xl mx-auto flex justify-between items-center bg-white/80 backdrop-blur-md border border-zinc-200/50 rounded-full px-8 py-3 pointer-events-auto shadow-sm relative">
+        <header className="fixed top-6 left-0 w-full z-50 px-6 pointer-events-none transform-gpu">
+            <nav className="max-w-4xl mx-auto flex justify-between items-center bg-white/80 backdrop-blur-md border border-zinc-200/50 rounded-full px-8 py-3 pointer-events-auto shadow-sm relative transform-gpu">
                 <Link href="/" className="text-xl font-heading font-semibold text-zinc-900 tracking-tight">
                     Noor<span className="text-razzmatazz">.</span>
                 </Link>

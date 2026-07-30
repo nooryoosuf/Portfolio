@@ -39,13 +39,14 @@ export default function ProjectCard({
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -8 }}
-                className="group relative rounded-[2rem] overflow-hidden bg-white border border-zinc-100 hover:border-zinc-200 transition-all duration-500 hover:shadow-2xl hover:shadow-black/5 cursor-pointer h-full"
+                viewport={{ once: true, amount: 0.2 }}
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="group relative rounded-[2rem] overflow-hidden bg-white border border-zinc-100 hover:border-zinc-200 transition-shadow duration-300 hover:shadow-xl cursor-pointer h-full transform-gpu"
             >
                 <div className={`${aspectClasses[aspect] || aspectClasses.portrait} w-full bg-zinc-50 relative overflow-hidden`}>
                     <div
-                        className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
+                        className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
                         style={{ backgroundColor: safeColor }}
                     />
 
@@ -53,18 +54,20 @@ export default function ProjectCard({
                         <img
                             src={featured_image}
                             alt={safeTitle}
+                            loading="lazy"
+                            decoding="async"
                             style={{ filter: "none", WebkitFilter: "none", opacity: 1 }}
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform transform-gpu"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-zinc-200 font-heading text-[6rem] md:text-[8rem] font-medium select-none group-hover:scale-110 transition-transform duration-1000">
+                            <span className="text-zinc-200 font-heading text-[6rem] md:text-[8rem] font-medium select-none group-hover:scale-110 transition-transform duration-500">
                                 {initialChar}
                             </span>
                         </div>
                     )}
 
-                    <div className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-sm z-10">
+                    <div className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-sm z-10">
                         <ArrowUpRight size={20} />
                     </div>
                 </div>

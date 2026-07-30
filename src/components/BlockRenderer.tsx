@@ -52,7 +52,7 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                                         viewport={{ once: true }}
                                         className="aspect-video md:aspect-auto rounded-[2rem] overflow-hidden border border-zinc-100 bg-zinc-50"
                                     >
-                                        <img src={url} alt="" className="w-full h-full object-cover" />
+                                        <img src={url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                     </motion.div>
                                 ))}
                             </div>
