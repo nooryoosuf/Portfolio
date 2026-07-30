@@ -69,14 +69,14 @@ export default function Home() {
     return (
         <div className="bg-white dark:bg-zinc-950 transition-colors duration-300">
             {/* Hero Section */}
-            <section className="min-h-[90vh] flex flex-col items-center justify-center px-6 pt-20">
+            <section className="min-h-[85vh] flex flex-col items-center justify-center px-6 pt-36 md:pt-44 pb-16">
                 <div className="max-w-4xl mx-auto text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
                     >
-                        <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-[0.2em] uppercase mb-6 block">
+                        <span className="text-zinc-400 dark:text-zinc-500 text-xs md:text-sm font-medium tracking-[0.2em] uppercase mb-6 block">
                             UI/UX & Graphic Designer
                         </span>
                         <h1 className="text-5xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white leading-[1.1] mb-8 whitespace-pre-line">
@@ -110,7 +110,7 @@ export default function Home() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5, duration: 1.5 }}
-                    className="mt-24 w-px h-24 bg-gradient-to-b from-zinc-200 dark:from-zinc-800 to-transparent"
+                    className="mt-16 md:mt-24 w-px h-20 bg-gradient-to-b from-zinc-200 dark:from-zinc-800 to-transparent"
                 />
             </section>
 
