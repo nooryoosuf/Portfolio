@@ -9,16 +9,25 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#ffffff",
-        foreground: "#0a0a0b",
-        accent: "#18181b",
-        muted: "#71717a",
-        border: "#e4e4e7",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        accent: "var(--accent)",
+        muted: "var(--muted)",
+        border: "var(--border)",
         razzmatazz: "#F7095E",
+        ink: {
+          DEFAULT: "#0c0c0e",
+          soft: "#3f3f46",
+          faint: "#71717a",
+        },
       },
       fontFamily: {
         heading: ["var(--font-outfit)", "sans-serif"],
         body: ["var(--font-inter)", "sans-serif"],
+        serif: ["var(--font-instrument-serif)", "Georgia", "serif"],
+      },
+      transitionTimingFunction: {
+        expo: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-out forwards",

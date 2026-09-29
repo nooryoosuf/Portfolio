@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Edit, Trash2, Loader2, FileText as BlogIcon, ExternalLink, Filter, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileText as BlogIcon, ExternalLink, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ export default function AdminBlog() {
     const [loading, setLoading] = useState(true);
     const [showToast, setShowToast] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [category, setCategory] = useState("All");
 
     useEffect(() => {
         fetchPosts();
@@ -35,7 +36,7 @@ export default function AdminBlog() {
     }
 
     async function deletePost(id: string) {
-        if (!confirm("Are you sure you want to scrub this entry from the records?")) return;
+        if (!confirm("Delete this entry permanently?")) return;
 
         try {
             const { error } = await supabase.from('blog_posts').delete().match({ id });
@@ -48,115 +49,150 @@ export default function AdminBlog() {
         }
     }
 
-    const filteredPosts = posts.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const categories = useMemo(() => {
+        const set = new Set<string>();
+        posts.forEach((p) => p.category && set.add(p.category));
+        return ["All", ...Array.from(set)];
+    }, [posts]);
+
+    const filteredPosts = posts.filter(post => {
+        const q = searchQuery.toLowerCase();
+        const matchesQuery =
+            post.title.toLowerCase().includes(q) ||
+            (post.category || "").toLowerCase().includes(q);
+        const matchesCat = category === "All" || post.category === category;
+        return matchesQuery && matchesCat;
+    });
 
     return (
-        <div className="space-y-12">
-            <header className="flex justify-between items-end">
+        <div className="space-y-8 pb-16">
+            <header className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-heading font-medium text-zinc-900 tracking-tight mb-2">
-                        Journal <span className="text-razzmatazz">Management</span>
-                    </h1>
-                    <p className="text-zinc-500 font-light italic">Curating {posts.length} published thoughts.</p>
+                    <p className="eyebrow flex items-center gap-3">
+                        <span aria-hidden className="inline-block h-px w-8 bg-razzmatazz" />
+                        Studio
+                    </p>
+                    <h1 className="display mt-3 text-4xl md:text-5xl">Journal</h1>
+                    <p className="lede mt-3 !text-base">
+                        {posts.length} {posts.length === 1 ? "entry" : "entries"} published.
+                    </p>
                 </div>
                 <Link
                     href="/admin/blog/new"
-                    className="px-8 py-4 bg-zinc-900 text-white rounded-2xl font-medium hover:bg-zinc-800 transition-all flex items-center gap-3 shadow-xl hover:-translate-y-1"
+                    className="inline-flex min-h-[52px] items-center gap-2 rounded-full bg-zinc-950 px-7 text-[15px] font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                 >
-                    <Plus size={20} />
-                    Write Article
+                    <Plus size={18} aria-hidden />
+                    Write article
                 </Link>
             </header>
 
-            {/* Modern Toolbar */}
-            <div className="flex flex-col md:flex-row gap-4 mb-12">
-                <div className="flex-1 relative group">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-razzmatazz transition-colors" size={20} />
+            {/* Toolbar */}
+            <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="relative flex-1">
+                    <Search aria-hidden className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <label htmlFor="post-search" className="sr-only">Search entries</label>
                     <input
+                        id="post-search"
                         type="text"
-                        placeholder="Filter by title or topic..."
+                        placeholder="Filter by title or topic…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white border border-zinc-100 rounded-[2rem] py-5 pl-16 pr-8 text-sm text-zinc-900 focus:outline-none focus:border-zinc-300 transition-all shadow-sm focus:shadow-xl"
+                        className="min-h-[52px] w-full rounded-full border border-zinc-200 bg-white py-3 pl-12 pr-6 text-[15px] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600 dark:focus:border-zinc-100"
                     />
                 </div>
-                <button className="px-8 py-5 bg-white border border-zinc-100 rounded-[2rem] text-sm font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 hover:border-zinc-300 transition-all flex items-center gap-3 shadow-sm">
-                    <Filter size={18} />
-                    Category
-                </button>
+                <label htmlFor="post-category" className="sr-only">Filter by category</label>
+                <select
+                    id="post-category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="min-h-[52px] rounded-full border border-zinc-200 bg-white px-6 text-sm font-medium text-zinc-600 outline-none transition-colors focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:focus:border-zinc-100"
+                >
+                    {categories.map((c) => (
+                        <option key={c} value={c}>{c === "All" ? "All categories" : c}</option>
+                    ))}
+                </select>
             </div>
 
-            {/* Grid Interface (Replacing Table for Professional Feel) */}
+            {/* Grid */}
             {loading ? (
-                <div className="p-40 flex flex-col items-center justify-center text-zinc-400 gap-6">
-                    <Loader2 className="animate-spin text-razzmatazz" size={48} />
-                    <p className="text-sm font-bold uppercase tracking-[0.2em] italic">Accessing Archives...</p>
-                </div>
+                <p className="eyebrow animate-pulse py-24 text-center">Loading entries</p>
             ) : filteredPosts.length === 0 ? (
-                <div className="p-40 flex flex-col items-center justify-center border-2 border-dashed border-zinc-100 rounded-[3rem] text-zinc-400 gap-6">
-                    <BlogIcon size={48} className="opacity-10" />
-                    <p className="text-sm font-bold uppercase tracking-[0.2em] italic">No matching entries found.</p>
+                <div className="border-y border-zinc-200/80 py-20 text-center dark:border-zinc-800/80">
+                    <BlogIcon size={36} aria-hidden className="mx-auto text-zinc-200 dark:text-zinc-800" />
+                    <p className="mt-4 font-serif text-2xl italic text-zinc-400">No matching entries.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {filteredPosts.map((post) => (
-                        <motion.div
+                        <motion.article
                             key={post.id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="group bg-white border border-zinc-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-500 relative flex flex-col"
+                            layout
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="card-rest group relative flex flex-col p-6 transition-shadow duration-300 hover:shadow-lg"
                         >
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-200 group-hover:text-razzmatazz group-hover:bg-razzmatazz/5 transition-all duration-500">
-                                    <BlogIcon size={24} />
-                                </div>
+                            <div className="mb-5 flex items-start justify-between gap-3">
+                                <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200/80 text-zinc-400 transition-colors duration-300 group-hover:border-razzmatazz/40 group-hover:text-razzmatazz dark:border-zinc-800/80 dark:text-zinc-500">
+                                    <BlogIcon size={22} aria-hidden />
+                                </span>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => router.push(`/admin/blog/edit?id=${post.id}`)}
-                                        className="p-3 bg-zinc-50 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
+                                        aria-label={`Edit ${post.title}`}
+                                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-white"
                                     >
-                                        <Edit size={16} />
+                                        <Edit size={16} aria-hidden />
                                     </button>
                                     <button
                                         onClick={() => deletePost(post.id)}
-                                        className="p-3 bg-zinc-50 rounded-xl text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                                        aria-label={`Delete ${post.title}`}
+                                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 text-zinc-400 transition-colors hover:border-red-300 hover:text-red-600 dark:border-zinc-800 dark:hover:border-red-900 dark:hover:text-red-400"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={16} aria-hidden />
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="flex-1 space-y-4 mb-8">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-razzmatazz italic">{post.category}</span>
-                                <h3 className="text-2xl font-heading font-medium text-zinc-900 leading-tight line-clamp-2">{post.title}</h3>
-                                <p className="text-sm text-zinc-400 font-light italic line-clamp-2">{post.description}</p>
+                            <div className="flex-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-razzmatazz">{post.category || "Design"}</p>
+                                <h3 className="mt-1.5 line-clamp-2 font-heading text-[1.35rem] font-medium leading-snug tracking-tight text-zinc-950 dark:text-white">
+                                    {post.title}
+                                </h3>
+                                <p className="mt-1.5 line-clamp-2 text-sm font-light text-zinc-500 dark:text-zinc-400">
+                                    {post.description || "No summary yet."}
+                                </p>
                             </div>
 
-                            <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
-                                <div className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest italic">{new Date(post.created_at).toLocaleDateString()}</div>
-                                <Link href={`/blog/${post.slug}`} target="_blank" className="text-zinc-400 hover:text-razzmatazz transition-colors">
-                                    <ExternalLink size={16} />
+                            <div className="mt-5 flex items-center justify-between border-t border-zinc-200/70 pt-4 dark:border-zinc-800/70">
+                                <span className="text-[12px] font-light text-zinc-400 dark:text-zinc-500">
+                                    {post.created_at ? new Date(post.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recently"}
+                                    {post.read_time ? ` · ${post.read_time}` : ""}
+                                </span>
+                                <Link
+                                    href={`/blog/${post.slug}`}
+                                    target="_blank"
+                                    aria-label={`Preview ${post.title}`}
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white"
+                                >
+                                    <ExternalLink size={16} aria-hidden />
                                 </Link>
                             </div>
-                        </motion.div>
+                        </motion.article>
                     ))}
                 </div>
             )}
 
-            {/* Professional Notification System */}
             <AnimatePresence>
                 {showToast && (
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
+                        initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.5 }}
-                        className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 z-[100]"
+                        exit={{ opacity: 0, y: 12 }}
+                        role="status"
+                        className="fixed bottom-8 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-zinc-950 px-6 py-3.5 text-sm font-medium text-white shadow-xl dark:bg-white dark:text-zinc-950"
                     >
-                        <CheckCircle2 className="text-razzmatazz" size={20} />
-                        <span className="text-sm font-medium italic">Record successfully scrubbed from archives.</span>
+                        <CheckCircle2 aria-hidden className="text-razzmatazz" size={18} />
+                        Entry deleted.
                     </motion.div>
                 )}
             </AnimatePresence>

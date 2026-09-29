@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Edit, Trash2, Loader2, LayoutGrid, CheckCircle2, ExternalLink, ArrowUp, ArrowDown, Star } from "lucide-react";
 import Link from "next/link";
@@ -108,13 +109,13 @@ export default function AdminProjects() {
 
         setProjects(newProjects);
         await saveProjectOrder(newProjects);
-        setToastMessage(`"${hero.title}" saved as Homepage Hero Card!`);
+        setToastMessage(`"${hero.title}" is now the homepage hero.`);
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
     };
 
     async function deleteProject(id: string) {
-        if (!confirm("Are you sure you want to dismantle this project?")) return;
+        if (!confirm("Delete this project permanently?")) return;
 
         try {
             const { error } = await supabase
@@ -136,177 +137,189 @@ export default function AdminProjects() {
 
     const filteredProjects = projects.filter(p =>
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        (p.category || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
-        <div className="space-y-12">
-            <header className="flex justify-between items-end">
+        <div className="space-y-8 pb-16">
+            <header className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-heading font-medium text-zinc-900 tracking-tight mb-2">
-                        Work <span className="text-razzmatazz">Archive</span>
-                    </h1>
-                    <p className="text-zinc-500 font-light italic">
-                        Arranging {projects.length} portfolio items. Position #1 is featured as Homepage Hero Card.
+                    <p className="eyebrow flex items-center gap-3">
+                        <span aria-hidden className="inline-block h-px w-8 bg-razzmatazz" />
+                        Studio
+                    </p>
+                    <h1 className="display mt-3 text-4xl md:text-5xl">Work archive</h1>
+                    <p className="lede mt-3 !text-base">
+                        {projects.length} {projects.length === 1 ? "project" : "projects"} — position #1 features on the homepage.
                     </p>
                 </div>
                 <Link
                     href="/admin/projects/new"
-                    className="px-8 py-4 bg-zinc-900 text-white rounded-2xl font-medium hover:bg-zinc-800 transition-all flex items-center gap-3 shadow-xl hover:-translate-y-1"
+                    className="inline-flex min-h-[52px] items-center gap-2 rounded-full bg-zinc-950 px-7 text-[15px] font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                 >
-                    <Plus size={20} />
-                    Commission New
+                    <Plus size={18} aria-hidden />
+                    New project
                 </Link>
             </header>
 
             {/* Toolbar */}
-            <div className="flex flex-col md:flex-row gap-4 mb-12 items-center justify-between">
-                <div className="flex-1 relative group w-full">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-razzmatazz transition-colors" size={20} />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                    <Search aria-hidden className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <label htmlFor="project-search" className="sr-only">Search projects</label>
                     <input
+                        id="project-search"
                         type="text"
-                        placeholder="Search archives by title or client..."
+                        placeholder="Search by title or category…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white border border-zinc-100 rounded-[2rem] py-5 pl-16 pr-8 text-sm text-zinc-900 focus:outline-none focus:border-zinc-300 transition-all shadow-sm focus:shadow-xl"
+                        className="min-h-[52px] w-full rounded-full border border-zinc-200 bg-white py-3 pl-12 pr-6 text-[15px] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600 dark:focus:border-zinc-100"
                     />
                 </div>
                 {savingOrder && (
-                    <span className="text-xs font-bold text-razzmatazz uppercase tracking-widest flex items-center gap-2 px-4 py-2 bg-pink-50 rounded-full border border-pink-100 animate-pulse">
-                        <Loader2 size={14} className="animate-spin" /> Saving Order...
+                    <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                        <Loader2 size={14} aria-hidden className="animate-spin" /> Saving order
                     </span>
                 )}
             </div>
 
-            {/* Grid Interface */}
+            {/* Grid */}
             {loading ? (
-                <div className="p-40 flex flex-col items-center justify-center text-zinc-400 gap-6">
-                    <Loader2 className="animate-spin text-razzmatazz" size={48} />
-                    <p className="text-sm font-bold uppercase tracking-[0.2em] italic">Accessing Data Nodes...</p>
-                </div>
+                <p className="eyebrow animate-pulse py-24 text-center">Loading projects</p>
             ) : filteredProjects.length === 0 ? (
-                <div className="p-40 flex flex-col items-center justify-center border-2 border-dashed border-zinc-100 rounded-[3rem] text-zinc-400 gap-6">
-                    <LayoutGrid size={48} className="opacity-10" />
-                    <p className="text-sm font-bold uppercase tracking-[0.2em] italic">No projects found in the system.</p>
+                <div className="border-y border-zinc-200/80 py-20 text-center dark:border-zinc-800/80">
+                    <LayoutGrid size={36} aria-hidden className="mx-auto text-zinc-200 dark:text-zinc-800" />
+                    <p className="mt-4 font-serif text-2xl italic text-zinc-400">No projects found.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {filteredProjects.map((project, index) => {
                         const isHero = index === 0 && !searchQuery;
                         return (
-                            <motion.div
+                            <motion.article
                                 key={project.id}
                                 layout
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className={`group bg-white border rounded-[3rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col relative ${
-                                    isHero ? 'border-razzmatazz/40 ring-4 ring-razzmatazz/5 bg-gradient-to-b from-pink-50/20 to-white' : 'border-zinc-100'
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className={`card-rest group relative flex flex-col p-6 transition-shadow duration-300 hover:shadow-lg ${
+                                    isHero ? "!border-razzmatazz/50" : ""
                                 }`}
                             >
-                                {/* Position Badge */}
-                                <div className="flex justify-between items-center mb-6">
+                                <div className="mb-5 flex items-center justify-between gap-2">
                                     {isHero ? (
-                                        <span className="px-4 py-1.5 bg-zinc-900 text-white rounded-full text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 shadow-md">
-                                            <Star size={12} className="text-razzmatazz fill-razzmatazz" /> #1 HOMEPAGE HERO
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-950 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white dark:bg-white dark:text-zinc-950">
+                                            <Star size={11} aria-hidden className="text-razzmatazz" /> #1 Homepage hero
                                         </span>
                                     ) : (
-                                        <span className="px-3 py-1 bg-zinc-100 text-zinc-500 rounded-full text-[10px] font-bold tracking-widest">
-                                            #{index + 1} SLUG CARD
+                                        <span className="rounded-full bg-zinc-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                                            #{index + 1}
                                         </span>
                                     )}
 
-                                    {/* Re-order Arrows & Hero Button */}
                                     {!searchQuery && (
-                                        <div className="flex items-center gap-1 bg-zinc-50 p-1.5 rounded-2xl border border-zinc-100">
+                                        <div className="flex items-center gap-1 rounded-full border border-zinc-200 p-1 dark:border-zinc-800">
                                             <button
                                                 onClick={() => moveProject(index, 'up')}
                                                 disabled={index === 0}
-                                                title="Move Up"
-                                                className="p-1.5 hover:bg-white text-zinc-400 hover:text-zinc-900 rounded-xl transition-all disabled:opacity-20"
+                                                title="Move up"
+                                                aria-label={`Move ${project.title} up`}
+                                                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-950 disabled:opacity-30 dark:hover:bg-zinc-800 dark:hover:text-white"
                                             >
-                                                <ArrowUp size={14} />
+                                                <ArrowUp size={14} aria-hidden />
                                             </button>
                                             <button
                                                 onClick={() => moveProject(index, 'down')}
                                                 disabled={index === projects.length - 1}
-                                                title="Move Down"
-                                                className="p-1.5 hover:bg-white text-zinc-400 hover:text-zinc-900 rounded-xl transition-all disabled:opacity-20"
+                                                title="Move down"
+                                                aria-label={`Move ${project.title} down`}
+                                                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-950 disabled:opacity-30 dark:hover:bg-zinc-800 dark:hover:text-white"
                                             >
-                                                <ArrowDown size={14} />
+                                                <ArrowDown size={14} aria-hidden />
                                             </button>
                                             {index > 0 && (
                                                 <button
                                                     onClick={() => makeHero(index)}
-                                                    title="Make Homepage Hero Card"
-                                                    className="p-1.5 hover:bg-razzmatazz/10 text-zinc-400 hover:text-razzmatazz rounded-xl transition-all flex items-center gap-1 text-[10px] font-bold uppercase"
+                                                    title="Make homepage hero"
+                                                    className="inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:bg-razzmatazz/10 hover:text-razzmatazz"
                                                 >
-                                                    <Star size={14} /> Star
+                                                    <Star size={13} aria-hidden /> Hero
                                                 </button>
                                             )}
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="flex justify-between items-start mb-6">
-                                    <div
-                                        className="w-14 h-14 rounded-2xl bg-zinc-50 flex items-center justify-center relative overflow-hidden group-hover:bg-zinc-900 transition-all duration-500"
-                                    >
-                                        <div className="absolute inset-0 opacity-10 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: project.color }} />
+                                <div className="mb-5 flex items-start justify-between gap-3">
+                                    <span className="relative block h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-50 dark:border-zinc-800/80 dark:bg-zinc-900">
                                         {project.featured_image ? (
-                                            <img src={project.featured_image} alt={project.title} className="w-full h-full object-cover" />
+                                            <Image src={project.featured_image} alt="" fill sizes="56px" className="object-cover" />
                                         ) : (
-                                            <LayoutGrid size={24} className="text-zinc-200 group-hover:text-white relative z-10 transition-colors" />
+                                            <span className="flex h-full w-full items-center justify-center">
+                                                <LayoutGrid size={22} aria-hidden className="text-zinc-300 dark:text-zinc-700" />
+                                            </span>
                                         )}
-                                    </div>
+                                    </span>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => router.push(`/admin/projects/edit?id=${project.id}`)}
-                                            className="p-3 bg-zinc-50 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
+                                            aria-label={`Edit ${project.title}`}
+                                            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-white"
                                         >
-                                            <Edit size={16} />
+                                            <Edit size={16} aria-hidden />
                                         </button>
                                         <button
                                             onClick={() => deleteProject(project.id)}
-                                            className="p-3 bg-zinc-50 rounded-xl text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                                            aria-label={`Delete ${project.title}`}
+                                            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 text-zinc-400 transition-colors hover:border-red-300 hover:text-red-600 dark:border-zinc-800 dark:hover:border-red-900 dark:hover:text-red-400"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={16} aria-hidden />
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="flex-1 space-y-3 mb-8">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-razzmatazz italic">{project.category}</span>
-                                        <span className="text-[10px] font-bold text-zinc-300 italic opacity-40">{project.year}</span>
-                                    </div>
-                                    <h3 className="text-2xl font-heading font-medium text-zinc-900 leading-tight group-hover:text-razzmatazz transition-colors">{project.title}</h3>
-                                    <p className="text-sm text-zinc-400 font-light italic line-clamp-2">{project.client || "Self-Initiated"}</p>
+                                <div className="flex-1">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-razzmatazz">
+                                        {project.category || "Project"}
+                                        {project.year && <span className="ml-2 text-zinc-400 dark:text-zinc-500">{project.year}</span>}
+                                    </p>
+                                    <h3 className="mt-1.5 font-heading text-[1.35rem] font-medium leading-snug tracking-tight text-zinc-950 dark:text-white">
+                                        {project.title}
+                                    </h3>
+                                    <p className="mt-1.5 line-clamp-2 text-sm font-light text-zinc-500 dark:text-zinc-400">
+                                        {project.client || "Self-initiated"}
+                                    </p>
                                 </div>
 
-                                <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
-                                    <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest italic">{project.role || "Lead Designer"}</span>
-                                    <Link href={`/portfolio/${project.slug}`} target="_blank" className="text-zinc-300 hover:text-zinc-900 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest italic group/link">
-                                        Live Preview
-                                        <ExternalLink size={12} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                                <div className="mt-5 flex items-center justify-between border-t border-zinc-200/70 pt-4 dark:border-zinc-800/70">
+                                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">
+                                        {project.role || "Lead Designer"}
+                                    </span>
+                                    <Link
+                                        href={`/portfolio/${project.slug}`}
+                                        target="_blank"
+                                        className="group/link inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400 transition-colors hover:text-zinc-950 dark:hover:text-white"
+                                    >
+                                        Live preview
+                                        <ExternalLink size={12} aria-hidden className="transition-transform duration-200 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
                                     </Link>
                                 </div>
-                            </motion.div>
+                            </motion.article>
                         );
                     })}
                 </div>
             )}
 
-            {/* Notification Toast */}
             <AnimatePresence>
                 {showToast && (
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
+                        initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.5 }}
-                        className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 z-[100]"
+                        exit={{ opacity: 0, y: 12 }}
+                        role="status"
+                        className="fixed bottom-8 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-zinc-950 px-6 py-3.5 text-sm font-medium text-white shadow-xl dark:bg-white dark:text-zinc-950"
                     >
-                        <CheckCircle2 className="text-razzmatazz" size={20} />
-                        <span className="text-sm font-medium italic">{toastMessage}</span>
+                        <CheckCircle2 aria-hidden className="text-razzmatazz" size={18} />
+                        {toastMessage}
                     </motion.div>
                 )}
             </AnimatePresence>

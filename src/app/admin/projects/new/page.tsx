@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, Save, Plus, X, Type, Quote, LayoutList, Image as ImageIcon, LayoutGrid } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Save, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import ImageUpload from "@/components/ImageUpload";
+import BlockBuilder from "@/components/admin/BlockBuilder";
+import { useAutosaveDraft, DraftStatus } from "@/components/admin/useAutosaveDraft";
 
 export default function NewProject() {
     const router = useRouter();
@@ -17,7 +18,7 @@ export default function NewProject() {
         year: new Date().getFullYear().toString(),
         client: "",
         role: "Lead Designer",
-        color: "#ff0059",
+        color: "#F7095E",
         description: "", // This will be the "Brief"
         services: [] as string[],
         featured_image: "",
@@ -25,32 +26,17 @@ export default function NewProject() {
     });
 
     const [serviceInput, setServiceInput] = useState("");
+    const [restored, setRestored] = useState(false);
+    const { savedAt, loadDraft, clearDraft } = useAutosaveDraft("draft:new-project", formData);
 
-    const addBlock = (type: string) => {
-        let newBlock: any = { type };
-
-        if (type === 'section') {
-            newBlock = { ...newBlock, title: "", content: "" };
-        } else if (type === 'quote') {
-            newBlock = { ...newBlock, content: "", author: "" };
-        } else if (type === 'image_grid') {
-            newBlock = { ...newBlock, columns: 1, images: [""] };
-        } else if (type === 'list') {
-            newBlock = { ...newBlock, title: "", items: [""] };
+    useEffect(() => {
+        const d: any = loadDraft();
+        if (d && (d.title || d.description || (Array.isArray(d.content_blocks) && d.content_blocks.length > 0))) {
+            setFormData((prev) => ({ ...prev, ...d }));
+            setRestored(true);
         }
-
-        setFormData({ ...formData, content_blocks: [...formData.content_blocks, newBlock] });
-    };
-
-    const updateBlock = (index: number, data: any) => {
-        const newBlocks = [...formData.content_blocks];
-        newBlocks[index] = { ...newBlocks[index], ...data };
-        setFormData({ ...formData, content_blocks: newBlocks });
-    };
-
-    const removeBlock = (index: number) => {
-        setFormData({ ...formData, content_blocks: formData.content_blocks.filter((_, i) => i !== index) });
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const addService = () => {
         if (serviceInput && !formData.services.includes(serviceInput)) {
@@ -85,6 +71,7 @@ export default function NewProject() {
                 .insert([insertPayload]);
 
             if (error) throw error;
+            clearDraft();
             router.push("/admin/projects");
         } catch (error: any) {
             alert(error.message);
@@ -94,251 +81,113 @@ export default function NewProject() {
     };
 
     return (
-        <div className="pb-40">
-            <header className="mb-12 flex justify-between items-end">
+        <div className="space-y-8 pb-16">
+            <header className="flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <Link href="/admin/projects" className="flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors mb-4 text-sm font-medium">
-                        <ArrowLeft size={16} />
-                        Back to Archive
+                    <Link href="/admin/projects" className="group mb-4 inline-flex items-center gap-2 text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-950 dark:hover:text-white">
+                        <ArrowLeft size={16} aria-hidden className="transition-transform duration-300 group-hover:-translate-x-1" />
+                        Back to archive
                     </Link>
-                    <h1 className="text-4xl font-heading font-medium text-zinc-900 tracking-tight">
-                        Create <span className="text-razzmatazz">Project</span>
-                    </h1>
+                    <p className="eyebrow flex items-center gap-3">
+                        <span aria-hidden className="inline-block h-px w-8 bg-razzmatazz" />
+                        Studio
+                    </p>
+                    <h1 className="display mt-3 text-4xl md:text-5xl">New project</h1>
+                    {restored && <p className="mt-2 text-[13px] font-light text-zinc-500">Unsent draft restored — pick up where you left off.</p>}
                 </div>
-                <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="px-8 py-3 bg-zinc-900 text-white rounded-lg font-medium hover:bg-zinc-800 transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
-                >
-                    <Save size={18} />
-                    {loading ? "Publishing..." : "Publish to Live Site"}
-                </button>
+                <div className="flex flex-col items-end gap-2">
+                    <button onClick={handleSubmit} disabled={loading} className="btn-admin">
+                        <Save size={17} aria-hidden />
+                        {loading ? "Publishing…" : "Publish project"}
+                    </button>
+                    <DraftStatus savedAt={savedAt} />
+                </div>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <div className="lg:col-span-8 space-y-12">
-                    {/* Brief Section */}
-                    <section className="p-8 bg-white border border-zinc-200 rounded-3xl shadow-sm">
-                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-8 flex items-center gap-2">
-                            Project Brief
-                        </h2>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                <div className="space-y-6 lg:col-span-8">
+                    <section className="admin-card">
+                        <h2 className="admin-eyebrow mb-5">Project brief</h2>
+                        <label htmlFor="proj-brief" className="sr-only">Project brief</label>
                         <textarea
+                            id="proj-brief"
                             rows={4}
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl py-4 px-6 text-zinc-900 focus:outline-none focus:border-zinc-300 transition-colors resize-none text-lg font-light"
-                            placeholder="Describe the challenge and solution..."
+                            className="field resize-none text-lg font-light"
+                            placeholder="Describe the challenge and solution…"
                         />
                     </section>
 
-                    {/* Block Builder */}
-                    <section className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">Content Flow</h2>
-                            <div className="flex gap-2">
-                                <button onClick={() => addBlock('section')} className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors text-zinc-600 text-xs font-bold flex items-center gap-2 italic">
-                                    <Type size={14} /> + Section
-                                </button>
-                                <button onClick={() => addBlock('image_grid')} className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors text-zinc-600 text-xs font-bold flex items-center gap-2 italic">
-                                    <LayoutGrid size={14} /> + Visuals
-                                </button>
-                                <button onClick={() => addBlock('quote')} className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors text-zinc-600 text-xs font-bold flex items-center gap-2 italic">
-                                    <Quote size={14} /> + Quote
-                                </button>
-                                <button onClick={() => addBlock('list')} className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors text-zinc-600 text-xs font-bold flex items-center gap-2 italic">
-                                    <LayoutList size={14} /> + List
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-8">
-                            {formData.content_blocks.map((block, index) => (
-                                <div key={index} className="relative group bg-white border border-zinc-200 rounded-[2rem] p-8 shadow-sm">
-                                    <button
-                                        onClick={() => removeBlock(index)}
-                                        className="absolute top-6 right-6 text-zinc-300 hover:text-red-500 transition-colors"
-                                    >
-                                        <X size={20} />
-                                    </button>
-
-                                    <div className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.3em] mb-6">
-                                        {block.type.replace(/_/g, ' ')}
-                                    </div>
-
-                                    {block.type === 'section' && (
-                                        <div className="space-y-4">
-                                            <input
-                                                value={block.title}
-                                                onChange={(e) => updateBlock(index, { title: e.target.value })}
-                                                className="w-full bg-transparent text-2xl font-heading font-medium text-zinc-900 border-none focus:outline-none placeholder:text-zinc-200"
-                                                placeholder="Section Title (Optional)"
-                                            />
-                                            <textarea
-                                                value={block.content}
-                                                onChange={(e) => updateBlock(index, { content: e.target.value })}
-                                                className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl py-4 px-6 text-zinc-600 focus:outline-none min-h-[150px] resize-none"
-                                                placeholder="Write your content here..."
-                                            />
-                                        </div>
-                                    )}
-
-                                    {block.type === 'quote' && (
-                                        <div className="space-y-4">
-                                            <textarea
-                                                value={block.content}
-                                                onChange={(e) => updateBlock(index, { content: e.target.value })}
-                                                className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl py-6 px-8 text-xl font-heading italic text-zinc-900 focus:outline-none"
-                                                placeholder="Enter quote..."
-                                                rows={2}
-                                            />
-                                            <input
-                                                value={block.author}
-                                                onChange={(e) => updateBlock(index, { author: e.target.value })}
-                                                className="w-full bg-transparent text-[10px] font-bold uppercase tracking-widest text-zinc-400 focus:outline-none border-none"
-                                                placeholder="— Author Name"
-                                            />
-                                        </div>
-                                    )}
-
-                                    {block.type === 'image_grid' && (
-                                        <div className="space-y-6">
-                                            <div className="flex gap-4 mb-4">
-                                                {[1, 2, 3].map(n => (
-                                                    <button
-                                                        key={n}
-                                                        onClick={() => updateBlock(index, { columns: n, images: Array(n).fill("") })}
-                                                        className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all
-                                                            ${block.columns === n ? 'bg-zinc-900 text-white' : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'}
-                                                        `}
-                                                    >
-                                                        {n} Column{n > 1 && 's'}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div className={`grid grid-cols-1 md:grid-cols-${block.columns} gap-4`}>
-                                                {block.images.map((img: string, i: number) => (
-                                                    <ImageUpload
-                                                        key={i}
-                                                        value={img}
-                                                        onChange={(url) => {
-                                                            const newImgs = [...block.images];
-                                                            newImgs[i] = url;
-                                                            updateBlock(index, { images: newImgs });
-                                                        }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {block.type === 'list' && (
-                                        <div className="space-y-6">
-                                            <input
-                                                value={block.title}
-                                                onChange={(e) => updateBlock(index, { title: e.target.value })}
-                                                className="w-full bg-transparent text-xl font-heading font-medium text-zinc-900 focus:outline-none border-none"
-                                                placeholder="List Title (e.g. Features)"
-                                            />
-                                            <div className="space-y-3">
-                                                {block.items.map((item: string, i: number) => (
-                                                    <div key={i} className="flex gap-2">
-                                                        <input
-                                                            value={item}
-                                                            onChange={(e) => {
-                                                                const newItems = [...block.items];
-                                                                newItems[i] = e.target.value;
-                                                                updateBlock(index, { items: newItems });
-                                                            }}
-                                                            className="flex-1 bg-zinc-50 border border-zinc-100 rounded-xl py-2 px-4 text-sm"
-                                                            placeholder="List item..."
-                                                        />
-                                                        <button
-                                                            onClick={() => {
-                                                                const newItems = block.items.filter((_: any, idx: number) => idx !== i);
-                                                                updateBlock(index, { items: newItems });
-                                                            }}
-                                                            className="text-zinc-200 hover:text-red-500"
-                                                        >
-                                                            <X size={14} />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                                <button
-                                                    onClick={() => updateBlock(index, { items: [...block.items, ""] })}
-                                                    className="text-[10px] font-bold text-razzmatazz uppercase tracking-widest mt-2"
-                                                >
-                                                    + Add Item
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </section>
+                    <BlockBuilder
+                        blocks={formData.content_blocks}
+                        onChange={(content_blocks) => setFormData({ ...formData, content_blocks })}
+                    />
                 </div>
 
-                <div className="lg:col-span-4 space-y-8">
-                    <section className="p-8 bg-white border border-zinc-200 rounded-3xl shadow-sm">
-                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-8 flex items-center gap-2">
-                            Identity
-                        </h2>
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Title</label>
+                <div className="space-y-6 lg:col-span-4">
+                    <section className="admin-card space-y-5">
+                        <h2 className="admin-eyebrow">Identity</h2>
+                        {([
+                            ["Title", "title", "text"],
+                            ["Category", "category", "text"],
+                            ["Slug (auto if empty)", "slug", "text"],
+                            ["Client", "client", "text"],
+                            ["Role", "role", "text"],
+                        ] as const).map(([label, key]) => (
+                            <div key={key}>
+                                <label htmlFor={`proj-${key}`} className="field-label">{label}</label>
                                 <input
+                                    id={`proj-${key}`}
                                     type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none transition-colors"
+                                    value={(formData as any)[key]}
+                                    onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                                    className="field-sm"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Category</label>
-                                <input
-                                    type="text"
-                                    value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none transition-colors"
-                                />
+                        ))}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="proj-year" className="field-label">Year</label>
+                                <input id="proj-year" type="text" value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} className="field-sm" />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Client</label>
-                                <input
-                                    type="text"
-                                    value={formData.client}
-                                    placeholder="e.g. Acme Corp"
-                                    onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none transition-colors"
-                                />
+                            <div>
+                                <label htmlFor="proj-color" className="field-label">Accent</label>
+                                <input id="proj-color" type="color" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="h-[46px] w-full cursor-pointer rounded-xl border border-zinc-200 bg-white px-1 py-1 dark:border-zinc-800 dark:bg-zinc-900" />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Role</label>
-                                <input
-                                    type="text"
-                                    value={formData.role}
-                                    placeholder="e.g. Lead Designer"
-                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 px-4 text-zinc-900 focus:outline-none transition-colors"
-                                />
+                        </div>
+                        <div>
+                            <span className="field-label">Services</span>
+                            <div className="flex flex-wrap gap-2">
+                                {formData.services.map((s) => (
+                                    <span key={s} className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 px-3 py-1.5 text-[13px] font-medium text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
+                                        {s}
+                                        <button type="button" aria-label={`Remove ${s}`} onClick={() => setFormData({ ...formData, services: formData.services.filter((x) => x !== s) })} className="text-zinc-400 hover:text-red-500">
+                                            <X size={13} aria-hidden />
+                                        </button>
+                                    </span>
+                                ))}
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Year</label>
-                                    <input type="text" value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-2 px-3 text-sm" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Color</label>
-                                    <input type="color" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="w-full h-10 bg-white border border-zinc-200 rounded-xl px-1 py-1 cursor-pointer" />
-                                </div>
+                            <div className="mt-2.5 flex gap-2">
+                                <label htmlFor="proj-service" className="sr-only">Add service</label>
+                                <input
+                                    id="proj-service"
+                                    type="text"
+                                    value={serviceInput}
+                                    onChange={(e) => setServiceInput(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addService(); } }}
+                                    placeholder="Add a service…"
+                                    className="field-sm flex-1"
+                                />
+                                <button type="button" onClick={addService} aria-label="Add service" className="icon-btn">
+                                    <Plus size={16} aria-hidden />
+                                </button>
                             </div>
                         </div>
                     </section>
 
-                    <section className="p-8 bg-white border border-zinc-200 rounded-3xl shadow-sm">
-                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-8 flex items-center gap-2">
-                            Visual Header
-                        </h2>
+                    <section className="admin-card">
+                        <h2 className="admin-eyebrow mb-5">Cover visual</h2>
                         <ImageUpload
                             value={formData.featured_image}
                             onChange={(url) => setFormData({ ...formData, featured_image: url })}

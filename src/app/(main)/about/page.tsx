@@ -1,40 +1,100 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { User, Loader2 } from "lucide-react";
+import { useReducedMotion } from "framer-motion";
+import CountUp from "react-countup";
+import { User, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import SoftwareIcon from "@/components/SoftwareIcon";
+import Reveal from "@/components/ui/Reveal";
+import SectionHeading from "@/components/ui/SectionHeading";
+import ImageReveal from "@/components/ui/ImageReveal";
 
 const DEFAULT_SOFTWARES = [
-    { name: "MS Office", category: "Productivity Suite" },
+    { name: "Figma", category: "Interface & Design Systems" },
     { name: "Adobe Photoshop", category: "Photo & Raster Design" },
     { name: "Adobe Illustrator", category: "Vector & Branding" },
-    { name: "Adobe Premiere Pro", category: "Video Editing & Motion" },
     { name: "Adobe XD", category: "UI/UX Prototyping" },
-    { name: "Figma", category: "Interface & Design Systems" },
 ];
+
+/** Fallbacks match the approved site copy; CMS values override when present. */
+const DEFAULT_INTRO = [
+    "I'm a UI/UX and visual designer from the Maldives, interested in the space where design, technology, and creativity meet.",
+    "I design digital experiences that aim to be clear, useful, and visually considered. My work spans websites, web applications, digital products, design systems, branding, and visual communication. I enjoy taking something that might feel complicated and turning it into something that feels simple and intuitive.",
+    "Over the years, I've had the opportunity to work on a wide range of digital projects, from government and institutional platforms to commercial websites, portals, and emerging digital products. Working closely with developers has also shaped the way I design — I care not only about how something looks in Figma, but about how it actually works once it leaves the design file.",
+];
+
+const DEFAULT_STATS = [
+    { value: 8, suffix: "+", label: "Years designing" },
+    { value: 120, suffix: "+", label: "Projects shipped" },
+    { value: 30, suffix: "+", label: "Happy clients" },
+];
+
+const DEFAULT_DISCIPLINES = [
+    {
+        title: "UI/UX Design",
+        text: "Designing interfaces and experiences for websites, applications, portals, and digital products.",
+    },
+    {
+        title: "Web Design",
+        text: "Creating responsive, modern websites with a strong focus on hierarchy, usability, and visual consistency.",
+    },
+    {
+        title: "Visual & Graphic Design",
+        text: "From branding and illustrations to marketing materials, social content, and other visual communication.",
+    },
+    {
+        title: "Design Systems",
+        text: "Creating reusable components, patterns, and visual rules that help products stay consistent as they grow.",
+    },
+];
+
+const DEFAULT_PHILOSOPHY = {
+    quote: "I don't think good design is necessarily about adding more.",
+    paras: [
+        "I'm usually drawn to work that feels simple, intentional, and easy to understand. Typography, spacing, hierarchy, interaction, and small details can make a bigger difference than adding another visual element.",
+        "At the same time, I don't want everything to feel the same. I enjoy experimenting with interaction, motion, illustration, and visual ideas when they have a reason to exist.",
+        "For me, the goal is somewhere between functional and expressive — something that works well, but still feels like someone cared about making it.",
+    ],
+};
+
+const DEFAULT_JOURNEY = [
+    {
+        title: "Started in IT",
+        text: "My background started in IT — working close to how software gets built, long before I thought of myself as a designer.",
+    },
+    {
+        title: "Pulled toward the human side",
+        text: "Over time I became more interested in the visual and human side of technology — how people interact with software, how information is presented, and how an idea becomes a real digital experience.",
+    },
+    {
+        title: "Across the full range",
+        text: "That grew into UI/UX design and eventually into working across a much broader range of creative projects — from government and institutional platforms to commercial websites, portals, and emerging digital products.",
+    },
+    {
+        title: "Today",
+        text: "I work primarily in UI/UX and digital design, while continuing to explore illustration, branding, visual design, and the technologies that make digital products possible. Still learning, still experimenting.",
+    },
+];
+
+const DEFAULT_OUTSIDE_P2 =
+    "This blog is part of that — a place to document what I'm working on, share ideas, and explore things that don't fit neatly into a portfolio case study.";
+
+const DEFAULT_INTERESTS = ["Football", "Anime", "Travel"];
 
 export default function About() {
     const [settings, setSettings] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const reduce = useReducedMotion();
 
     useEffect(() => {
         async function fetchSettings() {
             try {
-                const { data } = await supabase.from('site_settings').select('*').single();
-                if (data) {
-                    let aboutData: any = {};
-                    if (data.about_text) {
-                        try {
-                            aboutData = JSON.parse(data.about_text);
-                        } catch (e) {
-                            aboutData = { about_bio_1: data.about_text };
-                        }
-                    }
-                    setSettings({
-                        ...data,
-                        ...aboutData
-                    });
+                const { data } = await supabase.from("site_settings").select("*").single();
+                if (data?.about_text) {
+                    try {
+                        setSettings(JSON.parse(data.about_text));
+                    } catch (e) {}
                 }
             } catch (err) {
                 console.error("Error fetching about settings:", err);
@@ -46,137 +106,218 @@ export default function About() {
     }, []);
 
     if (loading) {
-        return <div className="min-h-screen flex justify-center items-center bg-white dark:bg-zinc-950"><Loader2 className="animate-spin text-zinc-300 dark:text-zinc-700" size={48} /></div>;
+        return (
+            <div className="shell pt-40 pb-32 text-center" aria-label="Loading about">
+                <p className="eyebrow animate-pulse">Opening the narrative</p>
+            </div>
+        );
     }
 
-    const heading = settings?.about_heading || "Creativity meets purpose.";
-    const bio1 = settings?.about_bio_1 || "Based in the Maldives, I am a multi-disciplinary designer focused on building digital products that are as functional as they are beautiful.";
-    const bio2 = settings?.about_bio_2 || "I believe in the power of minimalism—not just as an aesthetic choice, but as a commitment to clarity, accessibility, and user-centricity.";
-    const bio3 = settings?.about_bio_3 || "From brand identities to complex user interfaces, my goal is to strip away the noise and focus on what truly matters.";
-    const beyondTitle = settings?.about_beyond_title || "Beyond the Screen.";
-    const beyondText = settings?.about_beyond_text || "When I'm not designing, you'll find me on the football pitch, deep in a tactical anime series, or traveling to find fresh perspectives.";
-    const interests = Array.isArray(settings?.about_interests) && settings.about_interests.length > 0 
-        ? settings.about_interests 
-        : ["Football", "Anime", "Travel"];
-    const softwareList = Array.isArray(settings?.software_stack) && settings.software_stack.length > 0
-        ? settings.software_stack
-        : DEFAULT_SOFTWARES;
-
-    const stats = [
-        { label: "Years Experience", value: "8+" },
-        { label: "Completed Projects", value: "150+" },
-        { label: "Coffee Consumed", value: "∞" },
+    const a = settings || {};
+    const intro = [a.about_bio_1 || DEFAULT_INTRO[0], a.about_bio_2 || DEFAULT_INTRO[1], a.about_bio_3 || DEFAULT_INTRO[2]];
+    const stats = Array.isArray(a.about_stats) && a.about_stats.length > 0 ? a.about_stats : DEFAULT_STATS;
+    const disciplines =
+        Array.isArray(a.about_disciplines) && a.about_disciplines.length > 0 ? a.about_disciplines : DEFAULT_DISCIPLINES;
+    const quote = a.about_philosophy_quote || DEFAULT_PHILOSOPHY.quote;
+    const philParas = [
+        a.about_philosophy_p1 || DEFAULT_PHILOSOPHY.paras[0],
+        a.about_philosophy_p2 || DEFAULT_PHILOSOPHY.paras[1],
+        a.about_philosophy_p3 || DEFAULT_PHILOSOPHY.paras[2],
     ];
+    const journey = Array.isArray(a.about_journey) && a.about_journey.length > 0 ? a.about_journey : DEFAULT_JOURNEY;
+    const beyondTitle = a.about_beyond_title || "Beyond the Screen.";
+    const beyondText =
+        a.about_beyond_text ||
+        "When I'm not designing, you'll find me on the football pitch, deep in a tactical anime series, or traveling to find fresh perspectives.";
+    const outsideP2 = a.about_outside_p2 || DEFAULT_OUTSIDE_P2;
+    const interests = Array.isArray(a.about_interests) && a.about_interests.length > 0 ? a.about_interests : DEFAULT_INTERESTS;
+    const softwareList =
+        Array.isArray(a.software_stack) && a.software_stack.length > 0 ? a.software_stack : DEFAULT_SOFTWARES;
+    const portrait = a.about_image || null;
 
     return (
-        <div className="pt-40 pb-32 px-6 bg-white dark:bg-zinc-950 min-h-screen transition-colors duration-300">
-            <div className="max-w-6xl mx-auto">
-                {/* Hero Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-32">
-                    <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-widest uppercase mb-4 block">The Narrative</span>
-                        <h1 className="text-5xl md:text-7xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white mb-12 leading-tight">
-                            {heading.split(" ").map((word: string, i: number) => (
-                                <span key={i} className={i % 2 === 1 ? "text-razzmatazz" : ""}>{word} </span>
-                            ))}
+        <div className="shell pt-32 md:pt-44 pb-20 md:pb-28">
+            {/* Intro */}
+            <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
+                <div>
+                    <Reveal>
+                        <p className="eyebrow flex items-center gap-3">
+                            <span aria-hidden className="inline-block h-px w-8 bg-razzmatazz" />
+                            About me
+                        </p>
+                        <h1 className="display mt-5 text-5xl sm:text-6xl md:text-7xl">
+                            Hi, I&apos;m <em className="serif-accent text-razzmatazz">Noor.</em>
                         </h1>
-                        <div className="space-y-8 text-zinc-500 dark:text-zinc-400 text-lg md:text-xl font-light leading-relaxed max-w-xl">
-                            {bio1 && <p>{bio1}</p>}
-                            {bio2 && <p>{bio2}</p>}
-                            {bio3 && <p>{bio3}</p>}
+                    </Reveal>
+                    <Reveal delay={0.1}>
+                        <div className="mt-8 max-w-xl space-y-6 text-lg md:text-xl font-light leading-relaxed text-zinc-600 dark:text-zinc-300">
+                            {intro.map((p: string, i: number) => (
+                                <p key={i}>{p}</p>
+                            ))}
                         </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2, duration: 1 }}
-                        className="relative"
-                    >
-                        <div className="aspect-[4/5] bg-zinc-50 dark:bg-zinc-900 rounded-[3rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 flex items-center justify-center relative group shadow-sm">
-                            {settings?.about_image ? (
-                                <img
-                                    src={settings.about_image}
-                                    alt="About Me"
-                                    loading="lazy"
-                                    decoding="async"
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                />
-                            ) : (
-                                <>
-                                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800 opacity-50" />
-                                    <User size={120} className="text-zinc-200 dark:text-zinc-800 group-hover:scale-110 transition-transform duration-1000" />
-                                </>
-                            )}
-                        </div>
-                    </motion.div>
+                    </Reveal>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32 py-12 border-y border-zinc-100 dark:border-zinc-800">
-                    {stats.map((stat) => (
-                        <div key={stat.label} className="text-center">
-                            <span className="block text-4xl md:text-5xl font-heading font-medium text-zinc-900 dark:text-white mb-2">{stat.value}</span>
-                            <span className="text-xs uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-medium">{stat.label}</span>
+                <Reveal delay={0.12} className="lg:sticky lg:top-28">
+                    {portrait ? (
+                        <ImageReveal src={portrait} alt="Portrait of Noor Yoosuf" aspect="aspect-[4/5]" />
+                    ) : (
+                        <div className="img-frame flex aspect-[4/5] items-center justify-center">
+                            <User size={96} aria-hidden className="text-zinc-200 dark:text-zinc-800" />
+                        </div>
+                    )}
+                    <p className="mt-4 text-[13px] font-light text-zinc-400 dark:text-zinc-500">
+                        Noor Yoosuf — designer, Mal&eacute;, Maldives
+                    </p>
+                </Reveal>
+            </div>
+
+            {/* Counters */}
+            <Reveal className="mt-16 md:mt-24">
+                <dl className="grid grid-cols-1 gap-8 border-y border-zinc-200/80 dark:border-zinc-800/80 py-10 sm:grid-cols-3">
+                    {stats.map((s: any) => (
+                        <div key={s.label}>
+                            <dd className="font-heading text-5xl md:text-6xl font-medium tracking-tight text-zinc-950 dark:text-white tabular-nums">
+                                {reduce ? (
+                                    <span>{s.value}{s.suffix}</span>
+                                ) : (
+                                    <CountUp
+                                        end={Number(s.value) || 0}
+                                        suffix={s.suffix || ""}
+                                        duration={2.2}
+                                        enableScrollSpy
+                                        scrollSpyOnce
+                                    />
+                                )}
+                            </dd>
+                            <dt className="eyebrow mt-2">{s.label}</dt>
                         </div>
                     ))}
+                </dl>
+            </Reveal>
+
+            {/* What I do */}
+            <section className="mt-16 md:mt-24">
+                <SectionHeading
+                    eyebrow="Practice"
+                    title={<>What <em className="serif-accent">I do.</em></>}
+                />
+                <div className="mt-4 grid gap-x-10 md:grid-cols-2">
+                    {disciplines.map((d: any, i: number) => (
+                        <Reveal key={d.title || i} delay={Math.min(i * 0.06, 0.2)}>
+                            <div className="group border-t border-zinc-200/80 dark:border-zinc-800/80 py-8 last:border-b md:[&:nth-last-child(2)]:border-b">
+                                <p aria-hidden className="font-serif italic text-base text-zinc-300 dark:text-zinc-700 tabular-nums">
+                                    0{i + 1}
+                                </p>
+                                <h3 className="mt-2 font-heading text-2xl font-medium tracking-tight text-zinc-950 dark:text-white">
+                                    {d.title}
+                                </h3>
+                                <p className="mt-3 max-w-md text-[15px] font-light leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                    {d.text}
+                                </p>
+                            </div>
+                        </Reveal>
+                    ))}
                 </div>
+            </section>
 
-                {/* Software Stack & Tools Section */}
-                <section className="mb-32">
-                    <header className="mb-16">
-                        <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-widest uppercase mb-4 block">Software & Tools</span>
-                        <h2 className="text-4xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white">
-                            Applications I <span className="text-razzmatazz">master</span>.
-                        </h2>
-                    </header>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                        {softwareList.map((sw: any, i: number) => (
-                            <motion.div
-                                key={sw.name || i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.08 }}
-                                viewport={{ once: true }}
-                                className="p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-white dark:hover:bg-zinc-900 hover:shadow-xl dark:hover:shadow-black/40 transition-all duration-300 flex flex-col items-center text-center group"
-                            >
-                                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-950 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-800 mb-4 group-hover:scale-110 transition-transform duration-300">
-                                    <SoftwareIcon name={sw.name} size={28} />
-                                </div>
-                                <h3 className="text-sm font-medium text-zinc-900 dark:text-white mb-1">{sw.name}</h3>
-                                <p className="text-zinc-400 dark:text-zinc-500 text-[11px] font-light italic">{sw.category || "Tool"}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* Beyond the Screen Section */}
-                <section className="p-12 md:p-24 bg-zinc-900 dark:bg-zinc-900/90 rounded-[4rem] text-white relative overflow-hidden shadow-2xl border border-transparent dark:border-zinc-800">
-                    <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-razzmatazz/15 rounded-full blur-3xl pointer-events-none" />
-                    <div className="max-w-3xl relative z-10">
-                        <header className="mb-12">
-                            <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight mb-8 underline decoration-zinc-700 underline-offset-8">
-                                {beyondTitle}
-                            </h2>
-                            <p className="text-zinc-400 text-xl font-light leading-relaxed">
-                                {beyondText}
-                            </p>
-                        </header>
-                        <div className="flex flex-wrap gap-4">
-                            {interests.map((item: string) => (
-                                <span key={item} className="px-6 py-2 bg-white/5 rounded-full text-xs uppercase tracking-widest border border-white/10 text-zinc-300">
-                                    {item}
-                                </span>
+            {/* Philosophy */}
+            <section className="mt-16 md:mt-24">
+                <SectionHeading
+                    eyebrow="Perspective"
+                    title={<>How I think <em className="serif-accent">about design.</em></>}
+                />
+                <Reveal delay={0.08}>
+                    <div className="mt-8 max-w-3xl space-y-6">
+                        <p className="font-serif italic text-2xl md:text-[1.9rem] leading-[1.45] text-zinc-900 dark:text-zinc-100">
+                            &ldquo;{quote}&rdquo;
+                        </p>
+                        <div className="space-y-5 text-lg font-light leading-relaxed text-zinc-600 dark:text-zinc-300">
+                            {philParas.map((p: string, i: number) => (
+                                <p key={i}>{p}</p>
                             ))}
                         </div>
                     </div>
+                </Reveal>
+            </section>
+
+            {/* Journey timeline */}
+            <section className="mt-16 md:mt-24">
+                <SectionHeading
+                    eyebrow="Background"
+                    title={<>My <em className="serif-accent">journey.</em></>}
+                />
+                <ol className="mt-10">
+                    {journey.map((j: any, i: number) => (
+                        <Reveal key={j.title || i} delay={Math.min(i * 0.05, 0.2)}>
+                            <li className="relative grid gap-3 border-t border-zinc-200/80 dark:border-zinc-800/80 py-8 last:border-b sm:grid-cols-[4rem_1fr] sm:gap-6">
+                                <span aria-hidden className="font-serif italic text-lg text-razzmatazz tabular-nums">
+                                    {String(i + 1).padStart(2, "0")}
+                                </span>
+                                <div>
+                                    <h3 className="font-heading text-xl md:text-2xl font-medium tracking-tight text-zinc-950 dark:text-white">
+                                        {j.title}
+                                    </h3>
+                                    <p className="mt-2 max-w-2xl text-[15px] md:text-base font-light leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                        {j.text}
+                                    </p>
+                                </div>
+                            </li>
+                        </Reveal>
+                    ))}
+                </ol>
+            </section>
+
+            {/* Toolbox */}
+            <section className="mt-16 md:mt-24">
+                <SectionHeading
+                    eyebrow="Toolbox"
+                    title={<>Instruments of <em className="serif-accent">the trade.</em></>}
+                />
+                <ul className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+                    {softwareList.slice(0, 6).map((sw: any, i: number) => (
+                        <Reveal key={sw.name || i} delay={Math.min(i * 0.05, 0.25)}>
+                            <li className="group flex min-h-[148px] flex-col items-center justify-center gap-3 rounded-2xl border border-zinc-200/80 bg-white px-4 py-6 text-center transition-colors duration-300 hover:border-razzmatazz dark:border-zinc-800/80 dark:bg-zinc-900/60 dark:hover:border-razzmatazz">
+                                <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-50 transition-transform duration-300 group-hover:scale-110 dark:bg-zinc-800">
+                                    <SoftwareIcon name={sw.name} size={26} />
+                                </span>
+                                <span>
+                                    <span className="block font-heading text-[15px] font-medium tracking-tight text-zinc-950 dark:text-white">{sw.name}</span>
+                                    <span className="mt-0.5 block text-xs font-light italic text-zinc-400 dark:text-zinc-500">{sw.category || "Tool"}</span>
+                                </span>
+                            </li>
+                        </Reveal>
+                    ))}
+                </ul>
+            </section>
+
+            {/* Outside */}
+            <Reveal className="mt-16 md:mt-24">
+                <section className="overflow-hidden rounded-2xl bg-zinc-950 px-8 py-12 text-white dark:bg-zinc-900 md:px-14 md:py-16">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">Outside the screen</p>
+                    <h2 className="display mt-4 max-w-2xl text-3xl text-white md:text-5xl">{beyondTitle}</h2>
+                    <div className="mt-6 max-w-2xl space-y-5 text-lg font-light leading-relaxed text-zinc-300">
+                        <p>{beyondText}</p>
+                        <p>{outsideP2}</p>
+                    </div>
+                    {interests.length > 0 && (
+                        <ul className="mt-8 flex flex-wrap gap-2.5" aria-label="Interests">
+                            {interests.map((item: string) => (
+                                <li key={item} className="rounded-full border border-white/15 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-200">
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    <Link
+                        href="/blog"
+                        className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[15px] font-medium text-zinc-950 transition-colors duration-300 hover:bg-zinc-200"
+                    >
+                        Read the journal
+                        <ArrowUpRight size={17} aria-hidden className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </Link>
                 </section>
-            </div>
+            </Reveal>
         </div>
     );
 }

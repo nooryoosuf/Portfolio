@@ -3,19 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0b;
+  --background: #fbfbfa;
+  --foreground: #0c0c0e;
   --accent: #18181b;
-  --muted: #71717a;
-  --border: #e4e4e7;
+  --muted: #6b6b76;
+  --border: #e7e5e0;
+  --accent-brand: #f7095e;
+  --ease-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-quick: 200ms;
+  --dur-base: 400ms;
+  --dur-slow: 700ms;
 }
 
 .dark {
-  --background: #09090b;
+  --background: #0a0a0c;
   --foreground: #fafafa;
   --accent: #fafafa;
   --muted: #a1a1aa;
-  --border: #27272a;
+  --border: #232326;
   color-scheme: dark;
 }
 
@@ -23,6 +28,7 @@ html {
   background-color: var(--background);
   color: var(--foreground);
   transition: background-color 0.3s ease, color 0.3s ease;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -31,36 +37,32 @@ body {
   overflow-x: hidden;
   font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   transition: background-color 0.3s ease, color 0.3s ease;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 ::selection {
-  background: #ff0059;
+  background: #f7095e;
   color: #ffffff;
 }
 
 ::-webkit-scrollbar {
   width: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
-
 ::-webkit-scrollbar-thumb {
   background: #d4d4d8;
   border-radius: 10px;
 }
-
 .dark ::-webkit-scrollbar-thumb {
   background: #3f3f46;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
 }
@@ -74,12 +76,141 @@ body {
   h6 {
     @apply tracking-tight font-heading font-medium;
   }
+
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid #f7095e;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
 }
 
-.section-padding {
-  @apply py-20 md:py-32 px-6 md:px-12 lg:px-24;
+@layer components {
+  /* Editorial layout */
+  .shell {
+    @apply max-w-6xl mx-auto px-6 md:px-10;
+  }
+  .shell-narrow {
+    @apply max-w-3xl mx-auto px-6;
+  }
+  .section-gap {
+    @apply py-16 md:py-24;
+  }
+
+  /* Typography */
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400;
+  }
+  .display {
+    @apply font-heading font-medium tracking-[-0.02em] text-zinc-950 dark:text-white leading-[1.02];
+  }
+  .lede {
+    @apply text-lg md:text-xl font-light leading-relaxed text-zinc-600 dark:text-zinc-400;
+  }
+  .serif-accent {
+    @apply font-serif italic font-normal tracking-normal;
+  }
+
+  /* Hairlines + rules */
+  .rule {
+    @apply border-t border-zinc-200/80 dark:border-zinc-800/80;
+  }
+  .hairline-b {
+    @apply border-b border-zinc-200/80 dark:border-zinc-800/80;
+  }
+
+  /* Cards — restrained radius language */
+  .card-rest {
+    @apply bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl transition-colors duration-300;
+  }
+
+  /* Images */
+  .img-frame {
+    @apply overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-100 dark:bg-zinc-900;
+  }
+  .img-frame img {
+    @apply w-full h-full object-cover;
+  }
+
+  /* Links */
+  .link-underline {
+    @apply underline underline-offset-4 decoration-zinc-300 dark:decoration-zinc-700 hover:decoration-zinc-900 dark:hover:decoration-white transition-colors;
+  }
+
+  /* Admin studio form language */
+  .admin-card {
+    @apply rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm md:p-8 dark:border-zinc-800/80 dark:bg-zinc-950;
+  }
+  .admin-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500;
+  }
+  .field-label {
+    @apply mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500;
+  }
+  .field {
+    @apply w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-[15px] text-zinc-900 outline-none transition-colors placeholder:text-zinc-300 focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600 dark:focus:border-zinc-100;
+  }
+  .field-sm {
+    @apply w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-300 focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600 dark:focus:border-zinc-100;
+  }
+  .field-plain {
+    @apply w-full bg-transparent text-zinc-950 outline-none placeholder:text-zinc-300 dark:text-white dark:placeholder:text-zinc-700;
+  }
+  .btn-admin {
+    @apply inline-flex min-h-[52px] items-center gap-2 rounded-full bg-zinc-950 px-7 text-[15px] font-medium text-white transition-colors duration-300 hover:bg-zinc-800 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200;
+  }
+  .chip-btn {
+    @apply inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-white;
+  }
+  .icon-btn {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-white;
+  }
+  .icon-btn-danger {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-200 text-zinc-400 transition-colors hover:border-red-300 hover:text-red-600 dark:border-zinc-800 dark:hover:border-red-900 dark:hover:text-red-400;
+  }
+
+  /* Keep legacy utility working but steer to new system */
+  .section-padding {
+    @apply py-16 md:py-24 px-6 md:px-10;
+  }
+  .glass {
+    @apply bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-800/60;
+  }
 }
 
-.glass {
-  @apply bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-white/20 dark:border-zinc-800/40;
+.spotlight-pill {
+  --spotlight-color: rgba(12, 12, 14, 0.1);
+  --ambience-color: #f7095e;
+}
+.dark .spotlight-pill {
+  --spotlight-color: rgba(255, 255, 255, 0.16);
+  --ambience-color: #f7095e;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 42s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

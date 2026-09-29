@@ -1,7 +1,8 @@
 "use client";
-import { motion } from "framer-motion";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import Reveal from "@/components/ui/Reveal";
 
 interface ProjectCardProps {
     title?: string;
@@ -16,7 +17,7 @@ interface ProjectCardProps {
 export default function ProjectCard({
     title = "Untitled",
     category = "Project",
-    color = "#ff0059",
+    color = "#F7095E",
     slug = "",
     span = "",
     aspect = "portrait",
@@ -30,57 +31,51 @@ export default function ProjectCard({
 
     const safeTitle = title || "Untitled";
     const safeCategory = category || "Project";
-    const safeColor = color || "#ff0059";
+    const safeColor = color || "#F7095E";
     const safeSlug = slug || "";
     const initialChar = safeTitle.length > 0 ? safeTitle.charAt(0).toUpperCase() : "P";
 
     return (
-        <Link href={`/portfolio/${safeSlug}`} className={span}>
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="group relative rounded-[2rem] overflow-hidden bg-white dark:bg-zinc-900/80 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-200 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl dark:hover:shadow-black/40 cursor-pointer h-full transform-gpu"
-            >
-                <div className={`${aspectClasses[aspect] || aspectClasses.portrait} w-full bg-zinc-50 dark:bg-zinc-950 relative overflow-hidden`}>
-                    <div
-                        className="absolute inset-0 opacity-10 dark:opacity-20 group-hover:opacity-20 dark:group-hover:opacity-35 transition-opacity duration-500 pointer-events-none"
+        <Reveal className={span}>
+            <Link href={`/portfolio/${safeSlug}`} className="group block">
+                <div className={`${aspectClasses[aspect] || aspectClasses.portrait} img-frame relative`}>
+                    <span
+                        aria-hidden
+                        className="absolute inset-0 opacity-[0.08] dark:opacity-[0.16] transition-opacity duration-500 group-hover:opacity-[0.16] dark:group-hover:opacity-[0.28]"
                         style={{ backgroundColor: safeColor }}
                     />
-
                     {featured_image ? (
-                        <img
+                        <Image
                             src={featured_image}
                             alt={safeTitle}
-                            loading="lazy"
-                            decoding="async"
-                            style={{ filter: "none", WebkitFilter: "none", opacity: 1 }}
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform transform-gpu"
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 800px"
+                            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
                         />
                     ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-zinc-200 dark:text-zinc-800 font-heading text-[6rem] md:text-[8rem] font-medium select-none group-hover:scale-110 transition-transform duration-500">
+                        <span aria-hidden className="absolute inset-0 flex items-center justify-center">
+                            <span className="font-heading text-[5rem] md:text-[7rem] font-medium text-zinc-200 dark:text-zinc-800 select-none transition-transform duration-500 group-hover:scale-110">
                                 {initialChar}
                             </span>
-                        </div>
+                        </span>
                     )}
-
-                    <div className="absolute top-6 right-6 w-12 h-12 bg-white dark:bg-zinc-900 rounded-full flex items-center justify-center text-zinc-900 dark:text-white opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-sm z-10">
-                        <ArrowUpRight size={20} />
-                    </div>
-                </div>
-
-                <div className="p-8">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 font-medium mb-2 block">
-                        {safeCategory}
+                    <span className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white text-zinc-950 opacity-0 shadow-lg translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 dark:bg-white">
+                        <ArrowUpRight size={19} aria-hidden />
                     </span>
-                    <h3 className="text-2xl font-heading font-medium text-zinc-900 dark:text-white group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors duration-300">
-                        {safeTitle}
-                    </h3>
                 </div>
-            </motion.div>
-        </Link>
+
+                <div className="flex items-baseline justify-between gap-4 px-1 pt-5">
+                    <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
+                            {safeCategory}
+                        </p>
+                        <h3 className="mt-1 truncate font-heading text-xl md:text-2xl font-medium tracking-tight text-zinc-950 dark:text-white transition-colors duration-300 group-hover:text-zinc-600 dark:group-hover:text-zinc-300">
+                            {safeTitle}
+                        </h3>
+                    </div>
+                    <span aria-hidden className="hidden sm:block h-px w-10 shrink-0 self-center bg-zinc-200 dark:bg-zinc-800 transition-all duration-300 group-hover:w-16 group-hover:bg-razzmatazz" />
+                </div>
+            </Link>
+        </Reveal>
     );
 }

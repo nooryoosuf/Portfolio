@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Outfit, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import ScrollManager from "@/components/ScrollManager";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -14,6 +14,13 @@ const outfit = Outfit({
     variable: "--font-outfit",
 });
 
+const instrumentSerif = Instrument_Serif({
+    subsets: ["latin"],
+    weight: ["400"],
+    style: ["normal", "italic"],
+    variable: "--font-instrument-serif",
+});
+
 export const metadata: Metadata = {
     title: "Noor Yoosuf | UI/UX & Graphic Designer",
     description: "Portfolio of Noor Yoosuf, a UI/UX and Graphic Designer specializing in branding, digital illustrations, and visual communication.",
@@ -26,7 +33,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`${inter.variable} ${outfit.variable} font-body antialiased selection:bg-razzmatazz selection:text-white bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300`}>
+            <body className={`${inter.variable} ${outfit.variable} ${instrumentSerif.variable} font-body antialiased selection:bg-razzmatazz selection:text-white bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300`}>
                 <ThemeProvider>
                     <ScrollManager />
                     {children}

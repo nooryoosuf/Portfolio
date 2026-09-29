@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useRef } from "react";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -45,12 +46,15 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
 
     return (
         <div className="space-y-2">
-            {label && <label className="text-xs font-bold text-zinc-400 uppercase tracking-tighter">{label}</label>}
+            {label && <span className="admin-eyebrow">{label}</span>}
 
             <div
                 onClick={() => !value && fileInputRef.current?.click()}
-                className={`relative aspect-video rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center p-4
-                    ${value ? 'border-zinc-200 bg-white' : 'border-zinc-100 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100'}
+                role="button"
+                tabIndex={value ? -1 : 0}
+                onKeyDown={(e) => { if (!value && (e.key === "Enter" || e.key === " ")) fileInputRef.current?.click(); }}
+                className={`relative aspect-video rounded-2xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden flex flex-col items-center justify-center p-4
+                    ${value ? 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950' : 'border-zinc-200 bg-zinc-50 hover:border-zinc-400 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600'}
                 `}
             >
                 <input
@@ -68,7 +72,7 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
                     </div>
                 ) : value ? (
                     <>
-                        <img src={value} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                        <Image src={value} alt="Preview" fill sizes="480px" className="object-cover" />
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();

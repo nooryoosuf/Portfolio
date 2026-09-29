@@ -1,30 +1,56 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowUpRight, Palette, Layout, Globe, PenTool, Loader2 } from "lucide-react";
+import { ArrowUpRight, Palette, Layout, Globe, PenTool } from "lucide-react";
 import Link from "next/link";
 import CapabilityCard from "@/components/CapabilityCard";
 import ProjectCard from "@/components/ProjectCard";
+import Reveal from "@/components/ui/Reveal";
+import ClientMarquee from "@/components/ui/ClientMarquee";
+import Testimonials from "@/components/ui/Testimonials";
+import SectionHeading from "@/components/ui/SectionHeading";
+import ArticleCard from "@/components/ui/ArticleCard";
+import MagneticButton from "@/components/ui/MagneticButton";
+import AnimatedLink from "@/components/ui/AnimatedLink";
 import { supabase } from "@/lib/supabase";
 
 const ICONS: Record<string, any> = {
-    Palette: <Palette size={24} />,
-    Layout: <Layout size={24} />,
-    Globe: <Globe size={24} />,
-    PenTool: <PenTool size={24} />,
+    Palette: <Palette size={20} />,
+    Layout: <Layout size={20} />,
+    Globe: <Globe size={20} />,
+    PenTool: <PenTool size={20} />,
 };
+
+function renderTitle(title: string) {
+    const words = title.split(" ").filter(Boolean);
+    if (words.length <= 1) return <>{title}</>;
+    const head = words.slice(0, -2).join(" ");
+    const tail = words.slice(-2).join(" ");
+    return (
+        <>
+            {head}{" "}
+            <em className="serif-accent text-razzmatazz">{tail}</em>
+        </>
+    );
+}
 
 export default function Home() {
     const [settings, setSettings] = useState<any>(null);
     const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
+    const [latestPosts, setLatestPosts] = useState<any[]>([]);
+    const [clients, setClients] = useState<string[]>([]);
+    const [testimonials, setTestimonials] = useState<any[]>([]);
+    const [totals, setTotals] = useState({ works: 0, posts: 0 });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const [settingsRes, projectsRes] = await Promise.all([
+                const [settingsRes, projectsRes, postsRes, worksCount, postsCount] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
-                    supabase.from('projects').select('*')
+                    supabase.from('projects').select('*'),
+                    supabase.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(3),
+                    supabase.from('projects').select('id', { count: 'exact', head: true }),
+                    supabase.from('blog_posts').select('id', { count: 'exact', head: true }),
                 ]);
 
                 let rawProjects = projectsRes.data || [];
@@ -51,6 +77,15 @@ export default function Home() {
 
                 if (settingsRes.data) setSettings(settingsRes.data);
                 setFeaturedProjects(rawProjects.slice(0, 3));
+                setLatestPosts(postsRes.data || []);
+                setClients(Array.from(new Set(rawProjects.map((p: any) => p.client).filter(Boolean))) as string[]);
+                try {
+                    const parsed = settingsRes.data?.about_text ? JSON.parse(settingsRes.data.about_text) : {};
+                    if (Array.isArray(parsed.testimonials) && parsed.testimonials.length > 0) {
+                        setTestimonials(parsed.testimonials);
+                    }
+                } catch (e) {}
+                setTotals({ works: worksCount.count || 0, posts: postsCount.count || 0 });
             } catch (err) {
                 console.error("Error:", err);
             } finally {
@@ -60,116 +95,176 @@ export default function Home() {
         fetchData();
     }, []);
 
-    if (loading) return <div className="min-h-screen flex justify-center items-center bg-white dark:bg-zinc-950"><Loader2 className="animate-spin text-zinc-300 dark:text-zinc-700" size={48} /></div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-4" aria-label="Loading">
+                <p className="font-heading text-xl font-medium tracking-tight text-zinc-950 dark:text-white">
+                    Noor<span className="text-razzmatazz">.</span>
+                </p>
+                <p className="eyebrow animate-pulse">Preparing the studio</p>
+            </div>
+        );
+    }
 
     const heroTitle = typeof settings?.hero_title === 'string' ? settings.hero_title : "Crafting digital experiences with minimal intent.";
     const heroSubtitle = settings?.hero_subtitle || "Helping brands stand out through purposeful design and visual storytelling.";
     const services = Array.isArray(settings?.services) ? settings.services : [];
 
     return (
-        <div className="bg-white dark:bg-zinc-950 transition-colors duration-300">
-            {/* Hero Section */}
-            <section className="min-h-[85vh] flex flex-col items-center justify-center px-6 pt-36 md:pt-44 pb-16">
-                <div className="max-w-4xl mx-auto text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                    >
-                        <span className="text-zinc-400 dark:text-zinc-500 text-xs md:text-sm font-medium tracking-[0.2em] uppercase mb-6 block">
-                            UI/UX & Graphic Designer
-                        </span>
-                        <h1 className="text-5xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white leading-[1.1] mb-8 whitespace-pre-line">
-                            {heroTitle.split(' ').map((word: string, i: number) => (
-                                <span key={i} className={i % 3 === 0 ? "text-razzmatazz" : ""}>{word} </span>
-                            ))}
-                        </h1>
-                        <p className="max-w-xl mx-auto text-zinc-500 dark:text-zinc-400 text-lg md:text-xl font-light leading-relaxed mb-12">
-                            {heroSubtitle}
-                        </p>
-
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+        <div>
+            {/* Hero — editorial masthead */}
+            <section className="relative overflow-hidden pt-32 md:pt-44 pb-14 md:pb-20">
+                <div className="shell relative">
+                <Reveal delay={0.08}>
+                    <h1 className="display mt-7 max-w-5xl text-[2.9rem] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[5.4rem]">
+                        {renderTitle(heroTitle)}
+                    </h1>
+                </Reveal>
+                <Reveal delay={0.16}>
+                    <p className="lede mt-7 max-w-2xl">{heroSubtitle}</p>
+                </Reveal>
+                <Reveal delay={0.22}>
+                    <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+                        <MagneticButton>
                             <Link
                                 href="/portfolio"
-                                className="px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all duration-300 flex items-center gap-2 group shadow-sm"
+                                className="group inline-flex items-center gap-2 rounded-full bg-zinc-950 px-7 py-3.5 text-[15px] font-medium text-white transition-colors duration-300 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                             >
-                                View Projects
-                                <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                View selected work
+                                <ArrowUpRight size={17} aria-hidden className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                             </Link>
-                            <Link
-                                href="/about"
-                                className="text-zinc-600 dark:text-zinc-400 font-medium hover:text-zinc-900 dark:hover:text-white transition-colors"
-                            >
-                                Learn more about me
-                            </Link>
-                        </div>
-                    </motion.div>
+                        </MagneticButton>
+                        <AnimatedLink href="/about" withArrow>
+                            More about me
+                        </AnimatedLink>
+                    </div>
+                </Reveal>
+                <Reveal delay={0.28}>
+                    <dl className="mt-14 grid grid-cols-2 gap-6 border-t border-zinc-200/80 dark:border-zinc-800/80 pt-6 text-sm sm:grid-cols-4">
+                        {[
+                            ["Selected works", totals.works > 0 ? `${totals.works} case ${totals.works === 1 ? "study" : "studies"}` : "Case studies"],
+                            ["Journal", totals.posts > 0 ? `${totals.posts} ${totals.posts === 1 ? "entry" : "entries"}` : "Design notes"],
+                            ["Base", "Malé, Maldives"],
+                            ["Focus", "Brand & interface"],
+                        ].map(([term, value]) => (
+                            <div key={term}>
+                                <dt className="eyebrow">{term}</dt>
+                                <dd className="mt-1.5 font-light text-zinc-600 dark:text-zinc-300">{value}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                </Reveal>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5, duration: 1.5 }}
-                    className="mt-16 md:mt-24 w-px h-20 bg-gradient-to-b from-zinc-200 dark:from-zinc-800 to-transparent"
-                />
             </section>
 
-            {/* Capabilities Section */}
-            <section className="section-padding bg-zinc-50/50 dark:bg-zinc-900/30">
-                <div className="max-w-6xl mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
+            {/* Selected works */}
+            <section className="shell section-gap border-t border-zinc-200/80 dark:border-zinc-800/80">
+                <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+                    <SectionHeading
+                        eyebrow="Selected work"
+                        title={<>Work with <em className="serif-accent">intent.</em></>}
+                    />
+                    <Reveal delay={0.1}>
+                        <AnimatedLink href="/portfolio" withArrow className="text-[15px]">
+                            All projects
+                        </AnimatedLink>
+                    </Reveal>
+                </div>
+
+                <div className="grid grid-cols-1 gap-x-8 gap-y-14 md:grid-cols-6">
+                    {featuredProjects.map((project, index) => (
+                        <ProjectCard
+                            key={project.id}
+                            title={project.title}
+                            category={project.category}
+                            color={project.color}
+                            slug={project.slug}
+                            featured_image={project.featured_image}
+                            span={index === 0 ? "md:col-span-6" : "md:col-span-3"}
+                            aspect={index === 0 ? "video" : "portrait"}
+                        />
+                    ))}
+                </div>
+            </section>
+
+            {/* Clients + testimonials */}
+            {(clients.length > 0 || testimonials.length > 0) && (
+                <section className="border-t border-zinc-200/80 dark:border-zinc-800/80">
+                    <div className="shell section-gap">
+                        {clients.length > 0 && (
+                            <Reveal>
+                                <p className="eyebrow mb-8 text-center">Teams I&apos;ve worked with</p>
+                                <ClientMarquee clients={clients} />
+                            </Reveal>
+                        )}
+                        {testimonials.length > 0 && (
+                            <Reveal delay={0.08} className={clients.length > 0 ? "mt-14 md:mt-20" : ""}>
+                                <Testimonials items={testimonials} />
+                            </Reveal>
+                        )}
+                    </div>
+                </section>
+            )}
+
+            {/* Capabilities — numbered editorial index */}
+            {services.length > 0 && (
+                <section className="border-t border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/60 dark:bg-zinc-900/30">
+                    <div className="shell section-gap grid gap-10 md:grid-cols-[1fr_1.6fr]">
+                        <div className="md:sticky md:top-28 md:self-start">
+                            <SectionHeading
+                                eyebrow="Capabilities"
+                                title={<>A practice built on <em className="serif-accent">clarity.</em></>}
+                                lede="Fewer, sharper services — each one aimed at making brands coherent across every touchpoint."
+                            />
+                        </div>
                         <div>
-                            <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-widest uppercase mb-4 block">Services</span>
-                            <h2 className="text-4xl md:text-5xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white">
-                                My approach to <span className="text-razzmatazz">design.</span>
-                            </h2>
+                            {services.map((service: any, i: number) => (
+                                <CapabilityCard
+                                    key={i}
+                                    index={i}
+                                    icon={ICONS[service.icon] || <Palette size={20} />}
+                                    title={service.title}
+                                    description={service.description}
+                                />
+                            ))}
                         </div>
-                        <p className="max-w-md text-zinc-500 dark:text-zinc-400 font-light">
-                            I specialize in building <span className="text-razzmatazz">cohesive brand systems</span> and intuitive style guides.
-                        </p>
                     </div>
+                </section>
+            )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {services.map((service: any, i: number) => (
-                            <CapabilityCard
-                                key={i}
-                                icon={ICONS[service.icon] || <Palette size={24} />}
-                                title={service.title}
-                                description={service.description}
+            {/* Journal teaser */}
+            {latestPosts.length > 0 && (
+                <section className="shell section-gap border-t border-zinc-200/80 dark:border-zinc-800/80">
+                    <div className="mb-4 flex flex-wrap items-end justify-between gap-6">
+                        <SectionHeading
+                            eyebrow="Journal"
+                            title={<>Notes on <em className="serif-accent">process.</em></>}
+                            lede="Short, practical entries on design decisions — what worked, what didn't, and why."
+                        />
+                        <Reveal delay={0.1}>
+                            <AnimatedLink href="/blog" withArrow className="text-[15px]">
+                                All entries
+                            </AnimatedLink>
+                        </Reveal>
+                    </div>
+                    <div>
+                        {latestPosts.map((post, i) => (
+                            <ArticleCard
+                                key={post.id}
+                                index={i}
+                                slug={post.slug}
+                                title={post.title}
+                                description={post.description}
+                                category={post.category}
+                                createdAt={post.created_at}
+                                readTime={post.read_time}
+                                featuredImage={post.featured_image}
                             />
                         ))}
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
-            {/* Featured Section */}
-            <section className="section-padding">
-                <div className="max-w-6xl mx-auto">
-                    <div className="flex justify-between items-end mb-16">
-                        <h2 className="text-3xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white">
-                            Selected Works
-                        </h2>
-                        <Link href="/portfolio" className="text-sm font-medium text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors underline underline-offset-4 decoration-zinc-200 dark:decoration-zinc-800 hover:decoration-zinc-900 dark:hover:decoration-white">
-                            View All
-                        </Link>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
-                        {featuredProjects.map((project, index) => (
-                            <ProjectCard
-                                key={project.id}
-                                title={project.title}
-                                category={project.category}
-                                color={project.color}
-                                slug={project.slug}
-                                featured_image={project.featured_image}
-                                span={index === 0 ? "md:col-span-6" : "md:col-span-3"}
-                                aspect={index === 0 ? "video" : "square"}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </section>
         </div>
     );
 }

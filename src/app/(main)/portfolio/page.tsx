@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import ProjectCard from "@/components/ProjectCard";
+import Reveal from "@/components/ui/Reveal";
 import { supabase } from "@/lib/supabase";
-import { Loader2 } from "lucide-react";
 
 export default function Portfolio() {
     const [projects, setProjects] = useState<any[]>([]);
@@ -64,52 +63,46 @@ export default function Portfolio() {
     };
 
     return (
-        <div className="pt-40 pb-32 px-6 bg-white dark:bg-zinc-950 min-h-screen transition-colors duration-300">
-            <div className="max-w-6xl mx-auto">
-                <header className="mb-24 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <span className="text-zinc-400 dark:text-zinc-500 text-sm font-medium tracking-widest uppercase mb-4 block">Archive</span>
-                        <h1 className="text-6xl md:text-8xl font-heading font-medium tracking-tight text-zinc-900 dark:text-white mb-8">
-                            Selected <span className="text-razzmatazz">Work</span>
-                        </h1>
+        <div className="shell pt-32 md:pt-44 pb-20 md:pb-28">
+            <header>
+                <Reveal>
+                    <p className="eyebrow flex items-center gap-3">
+                        <span aria-hidden className="inline-block h-px w-8 bg-razzmatazz" />
+                        Archive — {projects.length} {projects.length === 1 ? "project" : "projects"}
+                    </p>
+                    <h1 className="display mt-5 max-w-4xl text-5xl sm:text-6xl md:text-7xl">
+                        Selected <em className="serif-accent text-razzmatazz">work.</em>
+                    </h1>
+                    <p className="lede mt-6 max-w-2xl">
+                        A curated selection of branding and interface projects — each one designed to be clear, useful, and quietly distinctive.
+                    </p>
+                </Reveal>
+            </header>
 
-                        <p className="text-zinc-500 dark:text-zinc-400 text-lg md:text-xl font-light max-w-2xl mx-auto leading-relaxed">
-                            A curated selection of projects focusing on minimal aesthetics and functional design.
-                        </p>
-                    </motion.div>
-                </header>
-
-                {loading ? (
-                    <div className="flex justify-center py-32">
-                        <Loader2 className="animate-spin text-zinc-300 dark:text-zinc-700" size={48} />
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
-                        {projects.map((project, index) => (
-                            <ProjectCard
-                                key={project.id}
-                                title={project.title}
-                                category={project.category}
-                                color={project.color}
-                                slug={project.slug}
-                                featured_image={project.featured_image}
-                                span={getSpan(index)}
-                                aspect={getAspect(index) as any}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {!loading && projects.length === 0 && (
-                    <div className="text-center py-32 border border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2rem]">
-                        <p className="text-zinc-400 dark:text-zinc-500 italic">No projects have been published yet.</p>
-                    </div>
-                )}
-            </div>
+            {loading ? (
+                <div className="py-24 text-center" aria-label="Loading projects">
+                    <p className="eyebrow animate-pulse">Gathering projects</p>
+                </div>
+            ) : projects.length > 0 ? (
+                <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-14 md:mt-16 md:grid-cols-6">
+                    {projects.map((project, index) => (
+                        <ProjectCard
+                            key={project.id}
+                            title={project.title}
+                            category={project.category}
+                            color={project.color}
+                            slug={project.slug}
+                            featured_image={project.featured_image}
+                            span={getSpan(index)}
+                            aspect={getAspect(index) as any}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div className="mt-12 border-y border-zinc-200/80 dark:border-zinc-800/80 py-20 text-center">
+                    <p className="font-serif italic text-2xl text-zinc-400 dark:text-zinc-500">No projects published yet.</p>
+                </div>
+            )}
         </div>
     );
 }
