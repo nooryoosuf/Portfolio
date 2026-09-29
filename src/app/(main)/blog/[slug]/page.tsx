@@ -14,11 +14,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             .select("title, description, category, featured_image")
             .eq("slug", slug)
             .single();
-        if (!data) return { title: "Journal — Noor Yoosuf" };
+        if (!data) return { title: { absolute: "Journal — Noor Yoosuf" } };
         const title = `${data.title} — Noor Yoosuf`;
         const description = data.description || `A journal entry on ${data.category || "design"} by Noor Yoosuf.`;
         return {
-            title,
+            title: { absolute: title },
             description,
             openGraph: {
                 title,

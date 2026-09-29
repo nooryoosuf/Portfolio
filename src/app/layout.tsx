@@ -22,8 +22,36 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-    title: "Noor Yoosuf | UI/UX & Graphic Designer",
-    description: "Portfolio of Noor Yoosuf, a UI/UX and Graphic Designer specializing in branding, digital illustrations, and visual communication.",
+    metadataBase: new URL("https://nooryoosuf.com"),
+    title: {
+        default: "Noor Yoosuf | UI/UX & Graphic Designer",
+        template: "%s — Noor Yoosuf",
+    },
+    description:
+        "Portfolio of Noor Yoosuf, a UI/UX and Graphic Designer from the Maldives specializing in branding, interfaces, and visual communication.",
+    keywords: ["Noor Yoosuf", "UI/UX designer Maldives", "graphic designer", "branding", "web design", "portfolio"],
+    authors: [{ name: "Noor Yoosuf" }],
+    creator: "Noor Yoosuf",
+    icons: { icon: "/icon.svg", apple: "/icon.svg" },
+    themeColor: [
+        { media: "(prefers-color-scheme: light)", color: "#fbfbfa" },
+        { media: "(prefers-color-scheme: dark)", color: "#0a0a0c" },
+    ],
+    openGraph: {
+        type: "website",
+        locale: "en_US",
+        siteName: "Noor Yoosuf",
+        title: "Noor Yoosuf | UI/UX & Graphic Designer",
+        description:
+            "Portfolio of Noor Yoosuf, a UI/UX and Graphic Designer from the Maldives specializing in branding, interfaces, and visual communication.",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Noor Yoosuf | UI/UX & Graphic Designer",
+        description:
+            "Portfolio of Noor Yoosuf, a UI/UX and Graphic Designer from the Maldives specializing in branding, interfaces, and visual communication.",
+    },
+    robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
