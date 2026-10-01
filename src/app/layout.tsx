@@ -32,7 +32,14 @@ export const metadata: Metadata = {
     keywords: ["Noor Yoosuf", "UI/UX designer Maldives", "graphic designer", "branding", "web design", "portfolio"],
     authors: [{ name: "Noor Yoosuf" }],
     creator: "Noor Yoosuf",
-    icons: { icon: "/icon.svg", apple: "/icon.svg" },
+    icons: {
+        icon: [
+            { url: "/icon.svg", type: "image/svg+xml" },
+            { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+            { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+        ],
+        apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    },
     themeColor: [
         { media: "(prefers-color-scheme: light)", color: "#fbfbfa" },
         { media: "(prefers-color-scheme: dark)", color: "#0a0a0c" },
