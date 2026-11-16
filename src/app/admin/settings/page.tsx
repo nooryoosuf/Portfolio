@@ -25,14 +25,14 @@ export default function SiteSettings() {
         hero_subtitle: "Helping brands stand out through purposeful design and visual storytelling.",
         contact_email: "nooor.yoosuf@gmail.com",
         about_heading: "Creativity meets purpose.",
-        about_bio_1: "I'm a UI/UX and visual designer from the Maldives, interested in the space where design, technology, and creativity meet.",
-        about_bio_2: "I design digital experiences that aim to be clear, useful, and visually considered. My work spans websites, web applications, digital products, design systems, branding, and visual communication. I enjoy taking something that might feel complicated and turning it into something that feels simple and intuitive.",
-        about_bio_3: "Over the years, I've had the opportunity to work on a wide range of digital projects, from government and institutional platforms to commercial websites, portals, and emerging digital products. Working closely with developers has also shaped the way I design — I care not only about how something looks in Figma, but about how it actually works once it leaves the design file.",
+        about_bio_1: "I'm Noor Yoosuf — a UI/UX and visual designer based in Malé, Maldives, working at the intersection of digital product design, brand identity, and visual storytelling.",
+        about_bio_2: "Over the past five-plus years at Javaabu and through independent commissions, I've designed more than 60 digital products — ranging from national government portals and enterprise systems to commercial websites, dashboards, and mobile applications for teams in the Maldives and abroad.",
+        about_bio_3: "Working side-by-side with engineers shaped how I approach every brief: I care not only about how an interface looks in Figma, but how every spacing token, state, and interaction holds up in production. Beyond product screens, I love crafting tournament identities, rebrands, and expressive calligraphy that carry a story of their own.",
         about_image: "",
-        about_beyond_title: "Design isn't the only thing.",
-        about_beyond_text: "I enjoy illustration and traditional drawing, experimenting with new creative tools, following technology and digital products, and working on personal ideas that don't always have a client or brief behind them. I like building things simply because I think they would be interesting to exist.",
-        about_outside_p2: "This blog is part of that — a place to document what I'm working on, share ideas, and explore things that don't fit neatly into a portfolio case study.",
-        about_interests: ["Football", "Anime", "Travel"],
+        about_beyond_title: "Beyond the screen.",
+        about_beyond_text: "When I'm not inside a Figma file or tweaking typography, you'll usually find me on the futsal pitch, deep into a tactical anime series, sketching personal illustration concepts, or traveling for fresh perspective.",
+        about_outside_p2: "My journal is an extension of that curiosity — a space to document lessons from five years in UI/UX, break down identity systems like Rashu Cup, and share ideas that don't fit neatly into a single case study.",
+        about_interests: ["Football & Futsal", "Anime", "Calligraphy", "Illustration", "Vibe Coding", "Travel"],
         about_stats: [
             { value: 8, suffix: "+", label: "Years designing" },
             { value: 120, suffix: "+", label: "Projects shipped" },
@@ -88,6 +88,9 @@ export default function SiteSettings() {
                 }
             }
 
+            const clean = (val: unknown, fallback: string) =>
+                typeof val === "string" && val.trim().length >= 35 && !val.trim().endsWith("...") ? val.trim() : fallback;
+
             setSettings((prev: any) => ({
                 ...prev,
                 hero_title: data.hero_title || prev.hero_title,
@@ -96,13 +99,13 @@ export default function SiteSettings() {
                 services: data.services || prev.services,
                 social_links: data.social_links || prev.social_links,
                 about_heading: aboutData.about_heading || prev.about_heading,
-                about_bio_1: aboutData.about_bio_1 || prev.about_bio_1,
-                about_bio_2: aboutData.about_bio_2 || prev.about_bio_2,
-                about_bio_3: aboutData.about_bio_3 || prev.about_bio_3,
+                about_bio_1: clean(aboutData.about_bio_1, prev.about_bio_1),
+                about_bio_2: clean(aboutData.about_bio_2, prev.about_bio_2),
+                about_bio_3: clean(aboutData.about_bio_3, prev.about_bio_3),
                 about_image: aboutData.about_image || prev.about_image,
                 about_beyond_title: aboutData.about_beyond_title || prev.about_beyond_title,
-                about_beyond_text: aboutData.about_beyond_text || prev.about_beyond_text,
-                about_outside_p2: aboutData.about_outside_p2 || prev.about_outside_p2,
+                about_beyond_text: clean(aboutData.about_beyond_text, prev.about_beyond_text),
+                about_outside_p2: clean(aboutData.about_outside_p2, prev.about_outside_p2),
                 about_interests: aboutData.about_interests || prev.about_interests,
                 about_stats: Array.isArray(aboutData.about_stats) && aboutData.about_stats.length > 0 ? aboutData.about_stats : prev.about_stats,
                 about_disciplines: Array.isArray(aboutData.about_disciplines) && aboutData.about_disciplines.length > 0 ? aboutData.about_disciplines : prev.about_disciplines,

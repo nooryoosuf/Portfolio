@@ -11,6 +11,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import ArticleCard from "@/components/ui/ArticleCard";
 import MagneticButton from "@/components/ui/MagneticButton";
 import AnimatedLink from "@/components/ui/AnimatedLink";
+import AsciiJellyfishHero from "@/components/ui/AsciiJellyfishHero";
 import { supabase } from "@/lib/supabase";
 
 const ICONS: Record<string, any> = {
@@ -81,8 +82,13 @@ export default function Home() {
                 setClients(Array.from(new Set(rawProjects.map((p: any) => p.client).filter(Boolean))) as string[]);
                 try {
                     const parsed = settingsRes.data?.about_text ? JSON.parse(settingsRes.data.about_text) : {};
-                    if (Array.isArray(parsed.testimonials) && parsed.testimonials.length > 0) {
-                        setTestimonials(parsed.testimonials);
+                    if (Array.isArray(parsed.testimonials)) {
+                        const validTestimonials = parsed.testimonials.filter(
+                            (t: any) => t && typeof t.quote === "string" && t.quote.trim().length > 0
+                        );
+                        if (validTestimonials.length > 0) {
+                            setTestimonials(validTestimonials);
+                        }
                     }
                 } catch (e) {}
                 setTotals({ works: worksCount.count || 0, posts: postsCount.count || 0 });
@@ -114,7 +120,8 @@ export default function Home() {
         <div>
             {/* Hero — editorial masthead */}
             <section className="relative overflow-hidden pt-32 md:pt-44 pb-14 md:pb-20">
-                <div className="shell relative">
+                <AsciiJellyfishHero />
+                <div className="shell relative z-10">
                 <Reveal delay={0.08}>
                     <h1 className="display mt-7 max-w-5xl text-[2.9rem] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[5.4rem]">
                         {renderTitle(heroTitle)}

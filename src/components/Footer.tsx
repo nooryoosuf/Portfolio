@@ -9,6 +9,7 @@ import AnimatedLink from "@/components/ui/AnimatedLink";
 const NAV = [
     { name: "Home", href: "/" },
     { name: "Portfolio", href: "/portfolio" },
+    { name: "Experiments", href: "/experiments" },
     { name: "About", href: "/about" },
     { name: "Journal", href: "/blog" },
     { name: "Connect", href: "/contact" },

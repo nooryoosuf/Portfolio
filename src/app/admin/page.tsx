@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { LayoutGrid, FileText, Settings, ArrowUpRight, Activity, Plus, User, Zap, Edit, ExternalLink } from "lucide-react";
+import { LayoutGrid, FileText, FlaskConical, Settings, ArrowUpRight, Activity, Plus, User, Zap, Edit, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import Reveal from "@/components/ui/Reveal";
@@ -234,13 +234,17 @@ export default function AdminDashboard() {
                         <h2 className="mb-4 px-1 text-[13px] font-semibold uppercase tracking-[0.14em] text-zinc-950 dark:text-white">
                             Fast access
                         </h2>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <Link
                                 href="/admin/projects/new"
                                 className="group rounded-2xl bg-zinc-950 p-5 text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                             >
                                 <Plus size={20} aria-hidden className="mb-3 text-razzmatazz" />
                                 <span className="block font-heading text-[17px] font-medium tracking-tight">New project</span>
+                            </Link>
+                            <Link href="/admin/experiments/new" className="card-rest group block p-5">
+                                <FlaskConical size={20} aria-hidden className="mb-3 text-zinc-400 transition-colors group-hover:text-razzmatazz" />
+                                <span className="block font-heading text-[17px] font-medium tracking-tight text-zinc-950 dark:text-white">New experiment</span>
                             </Link>
                             <Link href="/admin/blog/new" className="card-rest group block p-5">
                                 <FileText size={20} aria-hidden className="mb-3 text-zinc-400 transition-colors group-hover:text-razzmatazz" />

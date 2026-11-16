@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import { ArrowUpRight, MonitorPlay } from "lucide-react";
 import AnimatedTooltip from "@/components/ui/AnimatedTooltip";
 
 interface BlockProps {
@@ -32,26 +33,130 @@ function youtubeId(url: string): string | null {
     return m ? m[1] : null;
 }
 
-function VideoBlock({ url }: { url: string }) {
+function VideoBlock({ url, caption }: { url: string; caption?: string }) {
     const id = youtubeId(url);
-    if (id) {
-        return (
-            <div className="img-frame relative block aspect-video">
-                <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${id}`}
-                    title="Embedded video"
-                    loading="lazy"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 h-full w-full"
-                />
-            </div>
-        );
-    }
+    const isGif = /\.gif(\?.*)?$/i.test(url);
+
     return (
-        <div className="img-frame relative block aspect-video bg-black">
-            <video src={url} controls preload="none" playsInline className="absolute inset-0 h-full w-full object-contain" />
-        </div>
+        <figure className="w-full">
+            {id ? (
+                <div className="img-frame relative block aspect-video">
+                    <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${id}`}
+                        title={caption || "Embedded video"}
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="absolute inset-0 h-full w-full"
+                    />
+                </div>
+            ) : isGif ? (
+                <div className="img-frame relative block aspect-video">
+                    <Image
+                        src={url}
+                        alt={caption || "Demonstration GIF"}
+                        fill
+                        unoptimized
+                        sizes="(max-width: 768px) 100vw, 896px"
+                        className="object-contain"
+                    />
+                </div>
+            ) : (
+                <div className="img-frame relative block aspect-video bg-black">
+                    <video
+                        src={url}
+                        controls
+                        preload="none"
+                        playsInline
+                        className="absolute inset-0 h-full w-full object-contain"
+                    />
+                </div>
+            )}
+            {caption && (
+                <figcaption className="mt-3 text-[13px] font-light text-zinc-400 dark:text-zinc-500">
+                    {caption}
+                </figcaption>
+            )}
+        </figure>
+    );
+}
+
+function LiveEmbedBlock({ url, title, caption }: { url: string; title?: string; caption?: string }) {
+    const [loaded, setLoaded] = useState(false);
+    if (!url) return null;
+
+    return (
+        <figure className="w-full">
+            <div className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-50 dark:border-zinc-800/80 dark:bg-zinc-900/60">
+                <div className="flex items-center justify-between gap-4 border-b border-zinc-200/80 bg-white px-4 py-3 dark:border-zinc-800/80 dark:bg-zinc-950">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                        <span aria-hidden className="h-2 w-2 rounded-full bg-emerald-500" />
+                        <span className="truncate font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                            {title || url}
+                        </span>
+                    </div>
+                    <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group inline-flex shrink-0 items-center gap-1 text-xs font-medium text-zinc-600 transition-colors hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
+                    >
+                        Open live
+                        <ArrowUpRight
+                            size={13}
+                            aria-hidden
+                            className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        />
+                    </a>
+                </div>
+
+                {loaded ? (
+                    <div className="relative aspect-[16/10] w-full bg-white dark:bg-zinc-950">
+                        <iframe
+                            src={url}
+                            title={title || "Live project preview"}
+                            loading="lazy"
+                            sandbox="allow-scripts allow-same-origin allow-forms"
+                            className="h-full w-full border-0"
+                        />
+                    </div>
+                ) : (
+                    <div className="flex aspect-[16/9] flex-col items-center justify-center gap-4 px-6 text-center">
+                        <MonitorPlay size={28} aria-hidden className="text-zinc-400 dark:text-zinc-500" />
+                        <div>
+                            <p className="font-heading text-lg font-medium text-zinc-900 dark:text-white">
+                                Interactive Live Preview
+                            </p>
+                            <p className="mt-1 max-w-md text-sm font-light text-zinc-500 dark:text-zinc-400">
+                                Load the live build directly inside this page, or open it in a full browser tab.
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setLoaded(true)}
+                                className="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-zinc-950 px-5 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                            >
+                                Load preview
+                            </button>
+                            <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-5 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-700 transition-colors hover:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-white"
+                            >
+                                Launch tab <ArrowUpRight size={13} aria-hidden />
+                            </a>
+                        </div>
+                    </div>
+                )}
+            </div>
+            {caption && (
+                <figcaption className="mt-3 text-[13px] font-light text-zinc-400 dark:text-zinc-500">
+                    {caption}
+                </figcaption>
+            )}
+        </figure>
     );
 }
 
@@ -111,9 +216,14 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                         return (
                             <motion.section key={index} {...anim()} className="w-full">
                                 {block.title && (
-                                    <h2 className="font-heading text-2xl md:text-[1.75rem] font-medium tracking-tight text-zinc-950 dark:text-white">
-                                        {block.title}
-                                    </h2>
+                                    <div className="flex items-baseline gap-3">
+                                        <span aria-hidden className="font-serif italic text-sm text-razzmatazz tabular-nums">
+                                            {String(index + 1).padStart(2, "0")}
+                                        </span>
+                                        <h2 className="font-heading text-2xl md:text-[1.75rem] font-medium tracking-tight text-zinc-950 dark:text-white">
+                                            {block.title}
+                                        </h2>
+                                    </div>
                                 )}
                                 {block.content && (
                                     <div className={`space-y-5 text-[1.05rem] md:text-lg font-light leading-[1.85] text-zinc-600 dark:text-zinc-300 ${block.title ? "mt-5" : ""}`}>
@@ -128,18 +238,46 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                         );
 
                     case 'image_grid': {
+                        const validImages = (block.images || []).filter(Boolean);
+                        if (validImages.length === 0) return null;
                         const gridCols: Record<number, string> = {
                             1: 'md:grid-cols-1',
                             2: 'md:grid-cols-2',
                             3: 'md:grid-cols-3',
                         };
+                        const isMobileFrame = block.frame === "mobile";
+                        const aspectClass = isMobileFrame ? "aspect-[9/16] max-w-xs mx-auto" : "aspect-[16/10]";
+
                         return (
-                            <motion.figure key={index} {...anim()} className={`grid grid-cols-1 ${gridCols[block.columns] || 'md:grid-cols-1'} gap-4 md:gap-5 w-full`}>
-                                {block.images?.map((url: string, i: number) => (
-                                    <span key={i} className="img-frame relative block aspect-[16/10]">
-                                        <Image src={url} alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
-                                    </span>
-                                ))}
+                            <motion.figure key={index} {...anim()} className="w-full">
+                                <div className={`grid grid-cols-1 ${gridCols[block.columns] || 'md:grid-cols-1'} gap-4 md:gap-5 w-full`}>
+                                    {validImages.map((url: string, i: number) => {
+                                        const itemCaption = Array.isArray(block.captions) ? block.captions[i] : undefined;
+                                        return (
+                                            <div key={i} className="space-y-2.5">
+                                                <span className={`img-frame relative block w-full ${aspectClass}`}>
+                                                    <Image
+                                                        src={url}
+                                                        alt={itemCaption || block.caption || ""}
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, 896px"
+                                                        className="object-cover"
+                                                    />
+                                                </span>
+                                                {itemCaption && (
+                                                    <p className="text-[13px] font-light text-zinc-400 dark:text-zinc-500">
+                                                        {itemCaption}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                {block.caption && (
+                                    <figcaption className="mt-3 text-[13px] font-light text-zinc-400 dark:text-zinc-500">
+                                        {block.caption}
+                                    </figcaption>
+                                )}
                             </motion.figure>
                         );
                     }
@@ -162,7 +300,15 @@ export default function BlockRenderer({ blocks }: BlockProps) {
                         if (!block.url) return null;
                         return (
                             <motion.div key={index} {...anim()}>
-                                <VideoBlock url={block.url} />
+                                <VideoBlock url={block.url} caption={block.caption} />
+                            </motion.div>
+                        );
+
+                    case 'embed':
+                        if (!block.url) return null;
+                        return (
+                            <motion.div key={index} {...anim()}>
+                                <LiveEmbedBlock url={block.url} title={block.title} caption={block.caption} />
                             </motion.div>
                         );
 

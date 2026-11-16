@@ -1,14 +1,15 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence, animate } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Menu, X, ArrowUpRight, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 
 const navLinks = [
     { name: "Home", href: "/" },
     { name: "Portfolio", href: "/portfolio" },
+    { name: "Experiments", href: "/experiments" },
     { name: "About", href: "/about" },
     { name: "Journal", href: "/blog" },
 ];
@@ -20,12 +21,16 @@ function isActive(pathname: string, href: string) {
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [hoverX, setHoverX] = useState<number | null>(null);
+    const [scrolled, setScrolled] = useState(false);
     const { theme, toggleTheme, mounted } = useTheme();
     const pathname = usePathname();
-    const pillRef = useRef<HTMLDivElement>(null);
-    const spotlightX = useRef(0);
-    const ambienceX = useRef(0);
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 12);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
 
     useEffect(() => {
         document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -34,131 +39,71 @@ export default function Header() {
         };
     }, [isMenuOpen]);
 
-    const activeName = navLinks.find((l) => isActive(pathname, l.href))?.name ?? null;
-
-    useEffect(() => {
-        const pill = pillRef.current;
-        if (!pill) return;
-
-        const onMove = (e: MouseEvent) => {
-            const rect = pill.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            setHoverX(x);
-            spotlightX.current = x;
-            pill.style.setProperty("--spotlight-x", `${x}px`);
-        };
-        const centerOn = (name: string | null) => {
-            const item = name ? pill.querySelector(`[data-spot="${name}"]`) : null;
-            if (!item) return;
-            const pillRect = pill.getBoundingClientRect();
-            const itemRect = (item as HTMLElement).getBoundingClientRect();
-            const target = itemRect.left - pillRect.left + itemRect.width / 2;
-            animate(spotlightX.current, target, {
-                type: "spring",
-                stiffness: 200,
-                damping: 22,
-                onUpdate: (v) => {
-                    spotlightX.current = v;
-                    pill.style.setProperty("--spotlight-x", `${v}px`);
-                },
-            });
-        };
-        const onLeave = () => {
-            setHoverX(null);
-            centerOn(activeName);
-        };
-
-        pill.addEventListener("mousemove", onMove);
-        pill.addEventListener("mouseleave", onLeave);
-        return () => {
-            pill.removeEventListener("mousemove", onMove);
-            pill.removeEventListener("mouseleave", onLeave);
-        };
-    }, [activeName]);
-
-    useEffect(() => {
-        const pill = pillRef.current;
-        if (!pill) return;
-        const item = activeName ? pill.querySelector(`[data-spot="${activeName}"]`) : null;
-        if (!item) return;
-        const pillRect = pill.getBoundingClientRect();
-        const itemRect = (item as HTMLElement).getBoundingClientRect();
-        const target = itemRect.left - pillRect.left + itemRect.width / 2;
-        const controls = animate(ambienceX.current, target, {
-            type: "spring",
-            stiffness: 200,
-            damping: 22,
-            onUpdate: (v) => {
-                ambienceX.current = v;
-                pill.style.setProperty("--ambience-x", `${v}px`);
-            },
-        });
-        return () => controls.stop();
-    }, [activeName]);
-
     return (
-        <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6">
+        <header
+            className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+                scrolled
+                    ? "border-b border-zinc-200/80 bg-[var(--background)]/85 backdrop-blur-md dark:border-zinc-800/80"
+                    : "border-b border-transparent bg-[var(--background)]/60 backdrop-blur-sm"
+            }`}
+        >
             <nav
                 aria-label="Primary"
-                className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-2 rounded-full border border-zinc-200/70 bg-[var(--background)]/85 py-2 pl-5 pr-2 shadow-sm backdrop-blur-md transition-colors duration-300 dark:border-zinc-800/70"
+                className="shell flex h-16 items-center justify-between md:h-[72px]"
             >
-                <Link
-                    href="/"
-                    className="shrink-0 font-heading text-lg font-semibold tracking-tight text-zinc-950 dark:text-white"
-                    onClick={() => setIsMenuOpen(false)}
-                >
-                    Noor<span className="text-razzmatazz">.</span>
-                    <span className="sr-only"> — home</span>
-                </Link>
-
-                {/* Desktop spotlight links */}
-                <div
-                    ref={pillRef}
-                    className="spotlight-pill relative hidden overflow-hidden rounded-full bg-zinc-100/70 px-1 dark:bg-zinc-800/60 md:block"
-                >
-                    <div className="relative z-10 flex items-center">
-                        {navLinks.map((link) => {
-                            const active = isActive(pathname, link.href);
-                            return (
-                                <Link
-                                    key={link.name}
-                                    href={link.href}
-                                    data-spot={link.name}
-                                    aria-current={active ? "page" : undefined}
-                                    className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-razzmatazz/50 ${
-                                        active
-                                            ? "text-zinc-950 dark:text-white"
-                                            : "text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
-                                    }`}
-                                >
-                                    {link.name}
-                                </Link>
-                            );
-                        })}
-                    </div>
-                    <div
+                {/* Brand */}
+                <div className="flex items-center gap-3.5">
+                    <Link
+                        href="/"
+                        className="shrink-0 font-heading text-xl font-semibold tracking-tight text-zinc-950 dark:text-white"
+                        onClick={() => setIsMenuOpen(false)}
+                    >
+                        Noor<span className="text-razzmatazz">.</span>
+                        <span className="sr-only"> — home</span>
+                    </Link>
+                    <span
                         aria-hidden
-                        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-300"
-                        style={{
-                            opacity: hoverX !== null ? 1 : 0,
-                            background: `radial-gradient(90px circle at var(--spotlight-x, 50%) 100%, var(--spotlight-color) 0%, transparent 55%)`,
-                        }}
+                        className="hidden h-3.5 w-px bg-zinc-200 dark:bg-zinc-800 lg:inline-block"
                     />
-                    <div
-                        aria-hidden
-                        className="pointer-events-none absolute inset-x-0 bottom-1 z-0 h-[2px]"
-                        style={{
-                            background: `radial-gradient(48px circle at var(--ambience-x, 50%) 50%, var(--ambience-color) 0%, transparent 100%)`,
-                        }}
-                    />
+                    <span className="hidden text-xs font-normal tracking-wide text-zinc-400 dark:text-zinc-500 lg:inline-block">
+                        UI/UX &amp; Brand Design
+                    </span>
                 </div>
 
-                {/* Desktop actions */}
-                <div className="hidden shrink-0 items-center gap-1.5 md:flex">
+                {/* Desktop Navigation — simple, clean horizontal links */}
+                <div className="hidden items-center gap-8 md:flex">
+                    {navLinks.map((link) => {
+                        const active = isActive(pathname, link.href);
+                        return (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                aria-current={active ? "page" : undefined}
+                                className={`relative py-1.5 text-[14px] font-medium transition-colors duration-200 focus-visible:outline-none ${
+                                    active
+                                        ? "text-zinc-950 dark:text-white"
+                                        : "text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+                                }`}
+                            >
+                                {link.name}
+                                {active && (
+                                    <motion.span
+                                        layoutId="desktop-nav-underline"
+                                        className="absolute inset-x-0 -bottom-0.5 h-[2px] rounded-full bg-razzmatazz"
+                                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                    />
+                                )}
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* Desktop Actions */}
+                <div className="hidden shrink-0 items-center gap-2.5 md:flex">
                     <button
                         onClick={toggleTheme}
                         aria-label="Toggle color theme"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200/80 text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:bg-zinc-900 dark:hover:text-white"
                     >
                         {!mounted ? (
                             <span className="h-3.5 w-3.5 rounded-full bg-zinc-200 dark:bg-zinc-800" />
@@ -170,10 +115,10 @@ export default function Header() {
                     </button>
                     <Link
                         href="/contact"
-                        className={`group inline-flex items-center gap-1 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors duration-200 ${
+                        className={`group inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[13px] font-medium transition-colors duration-200 ${
                             isActive(pathname, "/contact")
-                                ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950"
-                                : "bg-zinc-950/5 text-zinc-950 hover:bg-zinc-950 hover:text-white dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-zinc-950"
+                                ? "bg-razzmatazz text-white"
+                                : "bg-zinc-950 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                         }`}
                     >
                         Connect

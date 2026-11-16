@@ -2,7 +2,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FolderKanban, FileText, Settings, LogOut, ExternalLink } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FlaskConical, FileText, Settings, LogOut, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -92,6 +92,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const navItems = [
         { label: "Dashboard", href: "/admin", icon: <LayoutDashboard size={17} /> },
         { label: "Projects", href: "/admin/projects", icon: <FolderKanban size={17} /> },
+        { label: "Experiments", href: "/admin/experiments", icon: <FlaskConical size={17} /> },
         { label: "Journal", href: "/admin/blog", icon: <FileText size={17} /> },
         { label: "Settings", href: "/admin/settings", icon: <Settings size={17} /> },
     ];
